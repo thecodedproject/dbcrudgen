@@ -1,0 +1,5 @@
+package single_type
+
+func HelloWorld() {
+}
+
