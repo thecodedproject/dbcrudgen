@@ -1,0 +1,8 @@
+create table my_data_model (
+  ID bigint,
+  CreatedAt datetime,
+  UpdatedAt datetime,
+  SomeString varchar(255),
+  SomeInt bigint,
+  SomeBool bit,
+);

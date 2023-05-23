@@ -29,6 +29,11 @@ func Generate() error {
 		return err
 	}
 
+	err = generateSchemaSql(d)
+	if err != nil {
+		return err
+	}
+
 	var files []gopkg.FileContents
 	files, err = tmpl.AppendFileContents(
 		files,

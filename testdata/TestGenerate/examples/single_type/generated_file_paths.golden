@@ -1,1 +1,2 @@
 examples/single_type/my_data_model/db_crud.go
+examples/single_type/my_data_model/schema.sql
