@@ -1,5 +1,5 @@
-package single_type
+package my_data_model
 
-func HelloWorld() {
+func Insert() {
 }
 

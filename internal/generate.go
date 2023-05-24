@@ -38,6 +38,7 @@ func Generate() error {
 	files, err = tmpl.AppendFileContents(
 		files,
 		fileDBCrud(d),
+		fileDBCrudTest(d),
 	)
 	if err != nil {
 		return err

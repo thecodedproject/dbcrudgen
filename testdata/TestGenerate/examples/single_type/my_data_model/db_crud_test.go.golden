@@ -1,0 +1,29 @@
+package my_data_model_test
+
+import (
+	single_type "github.com/thecodedproject/dbcrudgen/examples/single_type"
+	sqltest "github.com/thecodedproject/sqltest"
+	testing "testing"
+)
+
+func TestInsertSingleAndQuery(t *testing.T) {
+
+	testCases := []struct{
+		Name string
+		Data single_type.MyDataModel
+		Expected single_type.MyDataModel
+	}{
+		{
+			Name: "Insert empty and query",
+		},
+	}
+
+	for _, test := range testCases {
+		t.Run(test.Name, func(t *testing.T) {
+
+			_ = sqltest.OpenMysql(t, "schema.sql")
+
+		})
+	}
+}
+

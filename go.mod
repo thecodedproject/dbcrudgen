@@ -12,7 +12,9 @@ require (
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/go-sql-driver/mysql v1.7.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/sergi/go-diff v1.0.0 // indirect
+	github.com/thecodedproject/sqltest v0.0.0-20230516180504-ccb0a95d2337 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

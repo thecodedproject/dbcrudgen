@@ -2,6 +2,8 @@ github.com/davecgh/go-spew v1.1.0 h1:ZDRjVQ15GmhC3fiQ8ni8+OwkZQO4DARzQgrnXU1Liz8
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
+github.com/go-sql-driver/mysql v1.7.0 h1:ueSltNNllEqE3qcWBTD0iQd3IpL/6U+mJxLkazJ7YPc=
+github.com/go-sql-driver/mysql v1.7.0/go.mod h1:OXbVy3sEdcQ2Doequ6Z5BW6fXNQTmx+9S1MCJN5yJMI=
 github.com/iancoleman/strcase v0.2.0 h1:05I4QRnGpI0m37iZQRuskXh+w77mr6Z41lwQzuHLwW0=
 github.com/iancoleman/strcase v0.2.0/go.mod h1:iwCmte+B7n89clKwxIoIXy/HfoL7AsD47ZCWhYzw7ho=
 github.com/pkg/errors v0.8.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
@@ -20,6 +22,8 @@ github.com/thecodedproject/gopkg v0.0.0-20230521134204-a3d5d0f7e86b h1:DQ2S9o3/m
 github.com/thecodedproject/gopkg v0.0.0-20230521134204-a3d5d0f7e86b/go.mod h1:/sxB16ElXIkPlI0614rTReD/ZsM+xQcypL4SEzh/h7E=
 github.com/thecodedproject/gosql v0.0.0-20230522204317-e7c33e808459 h1:GJi6d627sIt4dJI2aeFC00QBjnTO6SCx0J4vaaWtz3c=
 github.com/thecodedproject/gosql v0.0.0-20230522204317-e7c33e808459/go.mod h1:bmInjNmhVb1Y5XsFNvP+g2vTSl7pl5I+11lOJ4L/oYY=
+github.com/thecodedproject/sqltest v0.0.0-20230516180504-ccb0a95d2337 h1:YlzIPZZYnR8M32EoslaKljWm2E+qEa268hgHrd6p3RU=
+github.com/thecodedproject/sqltest v0.0.0-20230516180504-ccb0a95d2337/go.mod h1:4SZX+/YgdZ5G8yxmC1abXRcGDDNi1Dp1sfJpt1wQGsA=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
 gopkg.in/yaml.v3 v3.0.1 h1:fxVm/GzAzEWqLHuvctI91KS9hhNmmWOoWu0XTYJS7CA=
 gopkg.in/yaml.v3 v3.0.1/go.mod h1:K4uyk7z7BCEPqu6E+C64Yfv1cQ7kz7rIZviUmN+EgEM=
