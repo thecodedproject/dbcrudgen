@@ -7,7 +7,7 @@ require (
 	github.com/sebdah/goldie/v2 v2.5.3
 	github.com/stretchr/testify v1.8.3
 	github.com/thecodedproject/gopkg v0.0.0-20230521134204-a3d5d0f7e86b
-	github.com/thecodedproject/gosql v0.0.0-20230522204317-e7c33e808459
+	github.com/thecodedproject/gosql v0.0.0-20230524114841-f9fc23a20a34
 )
 
 require (

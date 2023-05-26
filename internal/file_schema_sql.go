@@ -56,9 +56,17 @@ func makeSqlField(
 		return gosql.Field{}, err
 	}
 
+	fieldName := strcase.ToSnake(goField.Name)
+	var primaryKey bool
+	if fieldName == "id" {
+		primaryKey = true
+	}
+
 	return gosql.Field{
-		Name: goField.Name,
+		Name: fieldName,
 		Type: sqlType,
+		PrimaryKey: primaryKey,
+		AutoIncrement: primaryKey,
 	}, nil
 }
 

@@ -22,6 +22,8 @@ github.com/thecodedproject/gopkg v0.0.0-20230521134204-a3d5d0f7e86b h1:DQ2S9o3/m
 github.com/thecodedproject/gopkg v0.0.0-20230521134204-a3d5d0f7e86b/go.mod h1:/sxB16ElXIkPlI0614rTReD/ZsM+xQcypL4SEzh/h7E=
 github.com/thecodedproject/gosql v0.0.0-20230522204317-e7c33e808459 h1:GJi6d627sIt4dJI2aeFC00QBjnTO6SCx0J4vaaWtz3c=
 github.com/thecodedproject/gosql v0.0.0-20230522204317-e7c33e808459/go.mod h1:bmInjNmhVb1Y5XsFNvP+g2vTSl7pl5I+11lOJ4L/oYY=
+github.com/thecodedproject/gosql v0.0.0-20230524114841-f9fc23a20a34 h1:JQ/YH+HlZD1hO7Oc6xlcrNmDqRKUes/NiO9IlsG0JyE=
+github.com/thecodedproject/gosql v0.0.0-20230524114841-f9fc23a20a34/go.mod h1:bmInjNmhVb1Y5XsFNvP+g2vTSl7pl5I+11lOJ4L/oYY=
 github.com/thecodedproject/sqltest v0.0.0-20230516180504-ccb0a95d2337 h1:YlzIPZZYnR8M32EoslaKljWm2E+qEa268hgHrd6p3RU=
 github.com/thecodedproject/sqltest v0.0.0-20230516180504-ccb0a95d2337/go.mod h1:4SZX+/YgdZ5G8yxmC1abXRcGDDNi1Dp1sfJpt1wQGsA=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=

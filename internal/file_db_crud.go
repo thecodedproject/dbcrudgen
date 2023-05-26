@@ -30,6 +30,26 @@ func fileDBCrud(d pkgDef) func() ([]gopkg.FileContents, error) {
 				Functions: []gopkg.DeclFunc{
 					{
 						Name: "Insert",
+						Args: []gopkg.DeclVar{
+							{
+								Name: "ctx",
+								Type: gopkg.TypeNamed{
+									Name: "Context",
+									Import: "context",
+								},
+							},
+							{
+								Name: "d",
+								Type: gopkg.TypeNamed{
+									Name: model.Name,
+									Import: d.Import.Import,
+								},
+							},
+						},
+						ReturnArgs: tmpl.UnnamedReturnArgs(
+							gopkg.TypeInt64{},
+							gopkg.TypeError{},
+						),
 					},
 				},
 			})

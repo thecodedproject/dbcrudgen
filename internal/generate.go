@@ -12,6 +12,8 @@ import (
 
 var (
 	outputPath = flag.String("outdir,o", ".", "output directory for generated files")
+	// TODO add flags for making methods public
+	//publicInsert = flag.Bool("public_insert", "
 )
 
 type pkgDef struct {

@@ -1,5 +1,13 @@
 package my_data_model
 
-func Insert() {
+import (
+	context "context"
+	single_type "github.com/thecodedproject/dbcrudgen/examples/single_type"
+)
+
+func Insert(
+	ctx context.Context,
+	d single_type.MyDataModel,
+) (int64, error) {
 }
 

@@ -1,15 +1,5 @@
 ?   	github.com/thecodedproject/dbcrudgen/examples/single_type	[no test files]
-=== RUN   TestInsertSingleAndQuery
-=== RUN   TestInsertSingleAndQuery/Insert_empty_and_query
-    sqltest.go:50: 
-        	Error Trace:	/Users/ab/go/pkg/mod/github.com/thecodedproject/sqltest@v0.0.0-20230516180504-ccb0a95d2337/sqltest.go:50
-        	            				/Users/ab/code/codedproject/dbcrudgen/examples/single_type/my_data_model/db_crud_test.go:24
-        	Error:      	Received unexpected error:
-        	            	Error 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near ')' at line 8
-        	Test:       	TestInsertSingleAndQuery/Insert_empty_and_query
-        	Messages:   	error executing schema file
---- FAIL: TestInsertSingleAndQuery (X.XXs)
-    --- FAIL: TestInsertSingleAndQuery/Insert_empty_and_query (X.XXs)
+FAIL	github.com/thecodedproject/dbcrudgen/examples/single_type/my_data_model [build failed]
 FAIL
-FAIL	github.com/thecodedproject/dbcrudgen/examples/single_type/my_data_model	X.XXXs
-FAIL
+# github.com/thecodedproject/dbcrudgen/examples/single_type/my_data_model
+examples/single_type/my_data_model/db_crud.go:12:1: missing return
