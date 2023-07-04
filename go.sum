@@ -22,6 +22,10 @@ github.com/stretchr/testify v1.8.3 h1:RP3t2pwF7cMEbC1dqtB6poj3niw/9gnV4Cjg5oW5gt
 github.com/stretchr/testify v1.8.3/go.mod h1:sz/lmYIOXD/1dqDmKjjqLyZ2RngseejIcXlSw2iwfAo=
 github.com/thecodedproject/gopkg v0.0.0-20230521134204-a3d5d0f7e86b h1:DQ2S9o3/mlJTLCTY5qp4D2J9EaZ96aLTFm6TaUUtZ3s=
 github.com/thecodedproject/gopkg v0.0.0-20230521134204-a3d5d0f7e86b/go.mod h1:/sxB16ElXIkPlI0614rTReD/ZsM+xQcypL4SEzh/h7E=
+github.com/thecodedproject/gopkg v0.0.0-20230704103307-c0df71ee7bd8 h1:HrwJYANaq4sn54oIPFirvgcxz176mGbdOtneDgW2Skg=
+github.com/thecodedproject/gopkg v0.0.0-20230704103307-c0df71ee7bd8/go.mod h1:/sxB16ElXIkPlI0614rTReD/ZsM+xQcypL4SEzh/h7E=
+github.com/thecodedproject/gopkg v0.0.0-20230704104558-326d817863ce h1:Ih3F++n2hJEZT19M4Hxcm6Wv6divMOhO3r0x4NkD4Z0=
+github.com/thecodedproject/gopkg v0.0.0-20230704104558-326d817863ce/go.mod h1:/sxB16ElXIkPlI0614rTReD/ZsM+xQcypL4SEzh/h7E=
 github.com/thecodedproject/gosql v0.0.0-20230522204317-e7c33e808459 h1:GJi6d627sIt4dJI2aeFC00QBjnTO6SCx0J4vaaWtz3c=
 github.com/thecodedproject/gosql v0.0.0-20230522204317-e7c33e808459/go.mod h1:bmInjNmhVb1Y5XsFNvP+g2vTSl7pl5I+11lOJ4L/oYY=
 github.com/thecodedproject/gosql v0.0.0-20230524114841-f9fc23a20a34 h1:JQ/YH+HlZD1hO7Oc6xlcrNmDqRKUes/NiO9IlsG0JyE=

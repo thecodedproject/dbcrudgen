@@ -62,3 +62,78 @@ func TestInsertSingleAndQuery(t *testing.T) {
 	}
 }
 
+func TestUpdate(t *testing.T) {
+
+
+	testCases := []struct{
+		Name string
+		ToInsert []single_type.MyDataModel
+		Updates map[string]any
+		Query map[string]any
+		ExpectedNumUpdates int64
+		ExpectedData []single_type.MyDataModel
+		ExpectErr bool
+	}{
+		{
+			Name: "empty params does nothing",
+		},
+		{
+			Name: "update unknown field throws error",
+			Updates: map[string]any{
+				"field_not_in_the_single_type.MyDataModel_type": "update",
+			},
+			ExpectErr: true,
+		},
+		{
+			Name: "query unknown field throws error",
+			Updates: map[string]any{
+				"some_string": "1",
+			},
+			Query: map[string]any{
+				"field_not_in_the_single_type.MyDataModel_type": "update",
+			},
+			ExpectErr: true,
+		},
+		{
+			Name: "update all records",
+			ToInsert: make([]single_type.MyDataModel, 2),
+			Updates: map[string]any{
+				"some_string": "1",
+			},
+			ExpectedNumUpdates: 2,
+		},
+	}
+
+	for _, test := range testCases {
+		t.Run(test.Name, func(t *testing.T) {
+
+			ctx := context.Background()
+			db := sqltest.OpenMysql(t, "schema.sql")
+
+			for _, d := range test.ToInsert {
+				_, err := my_data_model.Insert(
+					ctx,
+					db,
+					d,
+				)
+				require.NoError(t, err)
+			}
+
+			numUpdates, err := my_data_model.Update(
+				ctx,
+				db,
+				test.Updates,
+				test.Query,
+			)
+
+			if test.ExpectErr {
+				require.Error(t, err)
+				return
+			}
+
+			require.NoError(t, err)
+			require.Equal(t, test.ExpectedNumUpdates, numUpdates)
+		})
+	}
+}
+

@@ -5,5 +5,15 @@
 --- PASS: TestInsertSingleAndQuery (X.XXs)
     --- PASS: TestInsertSingleAndQuery/Insert_empty_and_query (X.XXs)
     --- PASS: TestInsertSingleAndQuery/Insert_data_and_query (X.XXs)
+=== RUN   TestUpdate
+=== RUN   TestUpdate/empty_params_does_nothing
+=== RUN   TestUpdate/update_unknown_field_throws_error
+=== RUN   TestUpdate/query_unknown_field_throws_error
+=== RUN   TestUpdate/update_all_records
+--- PASS: TestUpdate (X.XXs)
+    --- PASS: TestUpdate/empty_params_does_nothing (X.XXs)
+    --- PASS: TestUpdate/update_unknown_field_throws_error (X.XXs)
+    --- PASS: TestUpdate/query_unknown_field_throws_error (X.XXs)
+    --- PASS: TestUpdate/update_all_records (X.XXs)
 PASS
 ok  	github.com/thecodedproject/dbcrudgen/examples/single_type/my_data_model	X.XXXs
