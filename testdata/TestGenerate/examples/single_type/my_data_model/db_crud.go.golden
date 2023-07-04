@@ -2,12 +2,62 @@ package my_data_model
 
 import (
 	context "context"
+	sql "database/sql"
 	single_type "github.com/thecodedproject/dbcrudgen/examples/single_type"
+	time "github.com/thecodedproject/gotest/time"
 )
 
 func Insert(
 	ctx context.Context,
+	db *sql.DB,
 	d single_type.MyDataModel,
 ) (int64, error) {
+
+	r, err := db.ExecContext(
+		ctx,
+		"insert into my_data_model set created_at=?, updated_at=?, some_string=?, some_int=?, some_bool=?",
+		time.Now(),
+		time.Now(),
+		d.SomeString,
+		d.SomeInt,
+		d.SomeBool,
+	)
+	if err != nil {
+		return 0, err
+	}
+
+	id, err := r.LastInsertId()
+	if err != nil {
+		return 0, err
+	}
+
+	return id, nil
+}
+
+func QueryRowByID(
+	ctx context.Context,
+	db *sql.DB,
+	id int64,
+) (single_type.MyDataModel, error) {
+
+	var d single_type.MyDataModel
+
+	err := db.QueryRowContext(
+		ctx,
+		"select id, created_at, updated_at, some_string, some_int, (some_bool = '1') from my_data_model where id=?",
+		id,
+	).Scan(
+		&d.ID,
+		&d.CreatedAt,
+		&d.UpdatedAt,
+		&d.SomeString,
+		&d.SomeInt,
+		&d.SomeBool,
+	)
+	if err != nil {
+		return single_type.MyDataModel{}, err
+	}
+
+	return d, nil
 }
 

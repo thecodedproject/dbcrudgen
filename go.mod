@@ -15,6 +15,7 @@ require (
 	github.com/go-sql-driver/mysql v1.7.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/sergi/go-diff v1.0.0 // indirect
-	github.com/thecodedproject/sqltest v0.0.0-20230516180504-ccb0a95d2337 // indirect
+	github.com/thecodedproject/gotest v0.0.0-20230703140753-332ed632c616 // indirect
+	github.com/thecodedproject/sqltest v0.0.0-20230621170455-0e03e7581fda // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

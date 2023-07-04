@@ -1,7 +1,12 @@
 package my_data_model_test
 
 import (
+	context "context"
+	require "github.com/stretchr/testify/require"
 	single_type "github.com/thecodedproject/dbcrudgen/examples/single_type"
+	my_data_model "github.com/thecodedproject/dbcrudgen/examples/single_type/my_data_model"
+	assert "github.com/thecodedproject/gotest/assert"
+	time "github.com/thecodedproject/gotest/time"
 	sqltest "github.com/thecodedproject/sqltest"
 	testing "testing"
 )
@@ -16,13 +21,43 @@ func TestInsertSingleAndQuery(t *testing.T) {
 		{
 			Name: "Insert empty and query",
 		},
+		{
+			Name: "Insert data and query",
+			Data: single_type.MyDataModel{
+				SomeString: "abcd",
+				SomeInt: 1234,
+				SomeBool: true,
+			},
+			Expected: single_type.MyDataModel{
+				SomeString: "abcd",
+				SomeInt: 1234,
+				SomeBool: true,
+			},
+		},
 	}
 
 	for _, test := range testCases {
 		t.Run(test.Name, func(t *testing.T) {
 
-			_ = sqltest.OpenMysql(t, "schema.sql")
+			now := time.SetTimeNowForTesting(t)
 
+			ctx := context.Background()
+			db := sqltest.OpenMysql(t, "schema.sql")
+
+			id, err := my_data_model.Insert(ctx, db, test.Data)
+			require.NoError(t, err)
+
+			actual, err := my_data_model.QueryRowByID(ctx, db, id)
+			require.NoError(t, err)
+
+			test.Expected.ID = id
+
+			now = now.Round(time.Second)
+
+			test.Expected.CreatedAt = now
+			test.Expected.UpdatedAt = now
+
+			assert.LogicallyEqual(t, test.Expected, actual)
 		})
 	}
 }

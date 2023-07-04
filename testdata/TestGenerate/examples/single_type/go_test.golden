@@ -1,5 +1,9 @@
 ?   	github.com/thecodedproject/dbcrudgen/examples/single_type	[no test files]
-FAIL	github.com/thecodedproject/dbcrudgen/examples/single_type/my_data_model [build failed]
-FAIL
-# github.com/thecodedproject/dbcrudgen/examples/single_type/my_data_model
-examples/single_type/my_data_model/db_crud.go:12:1: missing return
+=== RUN   TestInsertSingleAndQuery
+=== RUN   TestInsertSingleAndQuery/Insert_empty_and_query
+=== RUN   TestInsertSingleAndQuery/Insert_data_and_query
+--- PASS: TestInsertSingleAndQuery (X.XXs)
+    --- PASS: TestInsertSingleAndQuery/Insert_empty_and_query (X.XXs)
+    --- PASS: TestInsertSingleAndQuery/Insert_data_and_query (X.XXs)
+PASS
+ok  	github.com/thecodedproject/dbcrudgen/examples/single_type/my_data_model	X.XXXs
