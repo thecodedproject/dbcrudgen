@@ -35,7 +35,7 @@ func Insert(
 	return id, nil
 }
 
-func QueryRowByID(
+func SelectByID(
 	ctx context.Context,
 	db *sql.DB,
 	id int64,

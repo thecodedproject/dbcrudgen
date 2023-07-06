@@ -38,7 +38,7 @@ func fileDBCrud(d pkgDef) func() ([]gopkg.FileContents, error) {
 				Imports: imports,
 				Functions: []gopkg.DeclFunc{
 					insertMethod(d, modelName, modelStruct),
-					queryByIDMethod(d, modelName, modelStruct),
+					selectByIDMethod(d, modelName, modelStruct),
 					selectMethod(d, modelName, modelStruct),
 					updateMethod(d, modelName, modelStruct),
 					modelContainsFieldMethod(d, modelName, modelStruct),
@@ -123,7 +123,7 @@ func insertMethod(
 	}
 }
 
-func queryByIDMethod(
+func selectByIDMethod(
 	d pkgDef,
 	modelName string,
 	modelStruct gopkg.TypeStruct,
@@ -162,7 +162,7 @@ func queryByIDMethod(
 
 
 	return gopkg.DeclFunc{
-		Name: "QueryRowByID",
+		Name: "SelectByID",
 		Args: []gopkg.DeclVar{
 			ctxArg(),
 			dbArg(),

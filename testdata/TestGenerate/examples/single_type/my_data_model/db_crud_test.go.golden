@@ -11,7 +11,7 @@ import (
 	testing "testing"
 )
 
-func TestInsertSingleAndQuery(t *testing.T) {
+func TestInsertSingleAndSelect(t *testing.T) {
 
 	testCases := []struct{
 		Name string
@@ -47,7 +47,7 @@ func TestInsertSingleAndQuery(t *testing.T) {
 			id, err := my_data_model.Insert(ctx, db, test.Data)
 			require.NoError(t, err)
 
-			actual, err := my_data_model.QueryRowByID(ctx, db, id)
+			actual, err := my_data_model.SelectByID(ctx, db, id)
 			require.NoError(t, err)
 
 			test.Expected.ID = id

@@ -48,7 +48,7 @@ func fileDBCrudTest(d pkgDef) func() ([]gopkg.FileContents, error) {
 				PackageImportPath: dbcrudImport + "_test",
 				Imports: imports,
 				Functions: []gopkg.DeclFunc{
-					testfuncInsertAndQuery(d, modelName, modelStruct),
+					testfuncInsertAndSelect(d, modelName, modelStruct),
 					testfuncUpdate(d, modelName, modelStruct),
 				},
 			})
@@ -58,7 +58,7 @@ func fileDBCrudTest(d pkgDef) func() ([]gopkg.FileContents, error) {
 	}
 }
 
-func testfuncInsertAndQuery(
+func testfuncInsertAndSelect(
 	d pkgDef,
 	modelName string,
 	modelStruct gopkg.TypeStruct,
@@ -67,7 +67,7 @@ func testfuncInsertAndQuery(
 	dbcrudAlias := strcase.ToSnake(modelName)
 
 	return gopkg.DeclFunc{
-		Name: "TestInsertSingleAndQuery",
+		Name: "TestInsertSingleAndSelect",
 		Args: []gopkg.DeclVar{
 			testingArg(),
 		},
@@ -111,7 +111,7 @@ func testfuncInsertAndQuery(
 			id, err := ` + dbcrudAlias + `.Insert(ctx, db, test.Data)
 			require.NoError(t, err)
 
-			actual, err := ` + dbcrudAlias + `.QueryRowByID(ctx, db, id)
+			actual, err := ` + dbcrudAlias + `.SelectByID(ctx, db, id)
 			require.NoError(t, err)
 
 			test.Expected.ID = id

@@ -1,10 +1,10 @@
 ?   	github.com/thecodedproject/dbcrudgen/examples/single_type	[no test files]
-=== RUN   TestInsertSingleAndQuery
-=== RUN   TestInsertSingleAndQuery/Insert_empty_and_query
-=== RUN   TestInsertSingleAndQuery/Insert_data_and_query
---- PASS: TestInsertSingleAndQuery (X.XXs)
-    --- PASS: TestInsertSingleAndQuery/Insert_empty_and_query (X.XXs)
-    --- PASS: TestInsertSingleAndQuery/Insert_data_and_query (X.XXs)
+=== RUN   TestInsertSingleAndSelect
+=== RUN   TestInsertSingleAndSelect/Insert_empty_and_query
+=== RUN   TestInsertSingleAndSelect/Insert_data_and_query
+--- PASS: TestInsertSingleAndSelect (X.XXs)
+    --- PASS: TestInsertSingleAndSelect/Insert_empty_and_query (X.XXs)
+    --- PASS: TestInsertSingleAndSelect/Insert_data_and_query (X.XXs)
 === RUN   TestUpdate
 === RUN   TestUpdate/empty_params_does_nothing
 === RUN   TestUpdate/update_unknown_field_throws_error
