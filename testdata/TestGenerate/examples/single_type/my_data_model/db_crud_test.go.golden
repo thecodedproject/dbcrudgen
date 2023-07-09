@@ -2,6 +2,7 @@ package my_data_model_test
 
 import (
 	context "context"
+	fmt "fmt"
 	require "github.com/stretchr/testify/require"
 	single_type "github.com/thecodedproject/dbcrudgen/examples/single_type"
 	my_data_model "github.com/thecodedproject/dbcrudgen/examples/single_type/my_data_model"
@@ -11,48 +12,180 @@ import (
 	testing "testing"
 )
 
-func TestInsertSingleAndSelect(t *testing.T) {
+func populateDataModelFromNonce(nonce int64) single_type.MyDataModel {
+
+	return single_type.MyDataModel{
+		SomeBool: nonce%2==0,
+		SomeInt: nonce,
+		SomeString: "some_str" + fmt.Sprint(nonce),
+	}
+}
+
+func populateDataModelFromNonceWithID(
+	nonce int64,
+	id int64,
+) single_type.MyDataModel {
+
+	d := populateDataModelFromNonce(nonce)
+	d.ID = id
+	return d
+}
+
+func queryFromNonce(nonce int64) map[string]any {
+
+	return map[string]any{
+		"some_bool": nonce%2==0,
+		"some_int": nonce,
+		"some_string": "some_str" + fmt.Sprint(nonce),
+	}
+}
+
+func TestInsertAndSelect(t *testing.T) {
 
 	testCases := []struct{
 		Name string
-		Data single_type.MyDataModel
-		Expected single_type.MyDataModel
+		ToInsert []single_type.MyDataModel
+		Query map[string]any
+		Expected []single_type.MyDataModel
+		ExpectErr bool
 	}{
 		{
-			Name: "Insert empty and query",
+			Name: "selects nothing when nothing inserted",
 		},
 		{
-			Name: "Insert data and query",
-			Data: single_type.MyDataModel{
-				SomeString: "abcd",
-				SomeInt: 1234,
-				SomeBool: true,
+			Name: "insert one and select",
+			ToInsert: []single_type.MyDataModel{
+				populateDataModelFromNonce(11),
 			},
-			Expected: single_type.MyDataModel{
-				SomeString: "abcd",
-				SomeInt: 1234,
-				SomeBool: true,
+			Expected: []single_type.MyDataModel{
+				populateDataModelFromNonceWithID(11, 1),
 			},
+		},
+		{
+			Name: "insert many and select",
+			ToInsert: []single_type.MyDataModel{
+				populateDataModelFromNonce(11),
+				populateDataModelFromNonce(21),
+				populateDataModelFromNonce(31),
+				populateDataModelFromNonce(41),
+			},
+			Expected: []single_type.MyDataModel{
+				populateDataModelFromNonceWithID(11, 1),
+				populateDataModelFromNonceWithID(21, 2),
+				populateDataModelFromNonceWithID(31, 3),
+				populateDataModelFromNonceWithID(41, 4),
+			},
+		},
+		{
+			Name: "insert many and select with query",
+			ToInsert: []single_type.MyDataModel{
+				populateDataModelFromNonce(22),
+				populateDataModelFromNonce(45),
+				populateDataModelFromNonce(45),
+				populateDataModelFromNonce(1),
+				populateDataModelFromNonce(45),
+			},
+			Query: queryFromNonce(45),
+			Expected: []single_type.MyDataModel{
+				populateDataModelFromNonceWithID(45, 2),
+				populateDataModelFromNonceWithID(45, 3),
+				populateDataModelFromNonceWithID(45, 5),
+			},
+		},
+		{
+			Name: "select query field which is not in data model returns error",
+			ToInsert: []single_type.MyDataModel{
+				populateDataModelFromNonce(1),
+			},
+			Query: map[string]any{
+				"some_field_not_in_MyDataModel": 1,
+			},
+			ExpectErr: true,
 		},
 	}
 
 	for _, test := range testCases {
 		t.Run(test.Name, func(t *testing.T) {
 
-			now := time.SetTimeNowForTesting(t)
+			now := time.SetTimeNowForTesting(t).Round(time.Second)
 
 			ctx := context.Background()
 			db := sqltest.OpenMysql(t, "schema.sql")
 
-			id, err := my_data_model.Insert(ctx, db, test.Data)
+			for _, d := range test.ToInsert {
+				_, err := my_data_model.Insert(ctx, db, d)
+				require.NoError(t, err)
+			}
+
+			actual, err := my_data_model.Select(ctx, db, test.Query)
+			if test.ExpectErr {
+				require.Error(t, err)
+				return
+			}
 			require.NoError(t, err)
 
-			actual, err := my_data_model.SelectByID(ctx, db, id)
+			require.Equal(t, len(test.Expected), len(actual))
+
+			for i := range actual {
+
+				test.Expected[i].CreatedAt = now
+				test.Expected[i].UpdatedAt = now
+
+				assert.LogicallyEqual(t, test.Expected[i], actual[i], fmt.Sprint(i) + "th element not equal")
+			}
+		})
+	}
+}
+
+func TestSelectByID(t *testing.T) {
+
+	testCases := []struct{
+		Name string
+		ToInsert []single_type.MyDataModel
+		ID int64
+		Expected single_type.MyDataModel
+		ExpectErr bool
+	}{
+		{
+			Name: "when ID not found returns error",
+			ToInsert: []single_type.MyDataModel{
+				populateDataModelFromNonce(100),
+				populateDataModelFromNonce(200),
+			},
+			ID: 12345,
+			ExpectErr: true,
+		},
+		{
+			Name: "when ID is found returns row",
+			ToInsert: []single_type.MyDataModel{
+				populateDataModelFromNonce(100),
+				populateDataModelFromNonce(200),
+				populateDataModelFromNonce(300),
+			},
+			ID: 2,
+			Expected: populateDataModelFromNonceWithID(200, 2),
+		},
+	}
+
+	for _, test := range testCases {
+		t.Run(test.Name, func(t *testing.T) {
+
+			now := time.SetTimeNowForTesting(t).Round(time.Second)
+
+			ctx := context.Background()
+			db := sqltest.OpenMysql(t, "schema.sql")
+
+			for _, d := range test.ToInsert {
+				_, err := my_data_model.Insert(ctx, db, d)
+				require.NoError(t, err)
+			}
+
+			actual, err := my_data_model.SelectByID(ctx, db, test.ID)
+			if test.ExpectErr {
+				require.Error(t, err)
+				return
+			}
 			require.NoError(t, err)
-
-			test.Expected.ID = id
-
-			now = now.Round(time.Second)
 
 			test.Expected.CreatedAt = now
 			test.Expected.UpdatedAt = now
@@ -64,14 +197,13 @@ func TestInsertSingleAndSelect(t *testing.T) {
 
 func TestUpdate(t *testing.T) {
 
-
 	testCases := []struct{
 		Name string
 		ToInsert []single_type.MyDataModel
 		Updates map[string]any
 		Query map[string]any
 		ExpectedNumUpdates int64
-		ExpectedData []single_type.MyDataModel
+		Expected []single_type.MyDataModel
 		ExpectErr bool
 	}{
 		{
@@ -86,27 +218,57 @@ func TestUpdate(t *testing.T) {
 		},
 		{
 			Name: "query unknown field throws error",
-			Updates: map[string]any{
-				"some_string": "1",
-			},
+			Updates: queryFromNonce(1),
 			Query: map[string]any{
-				"field_not_in_the_single_type.MyDataModel_type": "update",
+				"field_not_in_MyDataModel": "update",
 			},
 			ExpectErr: true,
 		},
 		{
 			Name: "update all records",
-			ToInsert: make([]single_type.MyDataModel, 2),
-			Updates: map[string]any{
-				"some_string": "1",
+			ToInsert: []single_type.MyDataModel{
+				populateDataModelFromNonce(123),
+				populateDataModelFromNonce(124),
+				populateDataModelFromNonce(125),
+				populateDataModelFromNonce(126),
 			},
-			ExpectedNumUpdates: 2,
+			Updates: queryFromNonce(111),
+			ExpectedNumUpdates: 4,
+			Expected: []single_type.MyDataModel{
+				populateDataModelFromNonceWithID(111, 1),
+				populateDataModelFromNonceWithID(111, 2),
+				populateDataModelFromNonceWithID(111, 3),
+				populateDataModelFromNonceWithID(111, 4),
+			},
+		},
+		{
+			Name: "update records with query",
+			ToInsert: []single_type.MyDataModel{
+				populateDataModelFromNonce(123),
+				populateDataModelFromNonce(125),
+				populateDataModelFromNonce(124),
+				populateDataModelFromNonce(125),
+				populateDataModelFromNonce(126),
+				populateDataModelFromNonce(125),
+			},
+			Updates: queryFromNonce(999),
+			Query: queryFromNonce(125),
+			ExpectedNumUpdates: 3,
+			Expected: []single_type.MyDataModel{
+				populateDataModelFromNonceWithID(123, 1),
+				populateDataModelFromNonceWithID(999, 2),
+				populateDataModelFromNonceWithID(124, 3),
+				populateDataModelFromNonceWithID(999, 4),
+				populateDataModelFromNonceWithID(126, 5),
+				populateDataModelFromNonceWithID(999, 6),
+			},
 		},
 	}
 
 	for _, test := range testCases {
 		t.Run(test.Name, func(t *testing.T) {
 
+			now := time.SetTimeNowForTesting(t).Round(time.Second)
 			ctx := context.Background()
 			db := sqltest.OpenMysql(t, "schema.sql")
 
@@ -125,14 +287,195 @@ func TestUpdate(t *testing.T) {
 				test.Updates,
 				test.Query,
 			)
+			if test.ExpectErr {
+				require.Error(t, err)
+				return
+			}
+			require.NoError(t, err)
+
+			require.Equal(t, test.ExpectedNumUpdates, numUpdates)
+
+			actual, err := my_data_model.Select(ctx, db, nil)
+			require.NoError(t, err)
+
+			require.Equal(t, len(test.Expected), len(actual))
+
+			for i := range actual {
+				test.Expected[i].CreatedAt = now
+				test.Expected[i].UpdatedAt = now
+				assert.LogicallyEqual(t, test.Expected[i], actual[i], fmt.Sprint(i) + "th element not equal")
+			}
+		})
+	}
+}
+
+func TestUpdateByID(t *testing.T) {
+
+
+	testCases := []struct{
+		Name string
+		ToInsert []single_type.MyDataModel
+		ID int64
+		Updates map[string]any
+		Expected []single_type.MyDataModel
+		ExpectErr bool
+	}{
+		{
+			Name: "no updates does not error - even if ID does not exist",
+		},
+		{
+			Name: "when there are updates and ID not found throws error",
+			ID: 1234,
+			Updates: queryFromNonce(1),
+			ExpectErr: true,
+		},
+		{
+			Name: "when update field not in schema throws error",
+			ID: 1,
+			Updates: map[string]any{
+				"field_not_in_the_single_type.MyDataModel_type": "update",
+			},
+			ExpectErr: true,
+		},
+		{
+			Name: "insert many and update one by id",
+			ToInsert: []single_type.MyDataModel{
+				populateDataModelFromNonce(101),
+				populateDataModelFromNonce(102),
+				populateDataModelFromNonce(103),
+				populateDataModelFromNonce(104),
+			},
+			ID: 3,
+			Updates: queryFromNonce(555),
+			Expected: []single_type.MyDataModel{
+				populateDataModelFromNonceWithID(101, 1),
+				populateDataModelFromNonceWithID(102, 2),
+				populateDataModelFromNonceWithID(555, 3),
+				populateDataModelFromNonceWithID(104, 4),
+			},
+		},
+	}
+
+	for _, test := range testCases {
+		t.Run(test.Name, func(t *testing.T) {
+
+			now := time.SetTimeNowForTesting(t).Round(time.Second)
+			ctx := context.Background()
+			db := sqltest.OpenMysql(t, "schema.sql")
+
+			for _, d := range test.ToInsert {
+				_, err := my_data_model.Insert(ctx, db, d)
+				require.NoError(t, err)
+			}
+
+			err := my_data_model.UpdateByID(
+				ctx,
+				db,
+				test.ID,
+				test.Updates,
+			)
 
 			if test.ExpectErr {
 				require.Error(t, err)
 				return
 			}
-
 			require.NoError(t, err)
-			require.Equal(t, test.ExpectedNumUpdates, numUpdates)
+
+			actual, err := my_data_model.Select(ctx, db, nil)
+			require.NoError(t, err)
+
+			require.Equal(t, len(test.Expected), len(actual))
+
+			for i := range actual {
+				test.Expected[i].CreatedAt = now
+				test.Expected[i].UpdatedAt = now
+				assert.LogicallyEqual(t, test.Expected[i], actual[i], fmt.Sprint(i) + "th element not equal")
+			}
+		})
+	}
+}
+
+func TestDelete(t *testing.T) {
+
+	testCases := []struct{
+		Name string
+		ToInsert []single_type.MyDataModel
+		Query map[string]any
+		ExpectedNumDeleted int64
+		Expected []single_type.MyDataModel
+		ExpectErr bool
+	}{
+		{
+			Name: "empty query deletes all records",
+			ToInsert: []single_type.MyDataModel{
+				populateDataModelFromNonce(1000),
+				populateDataModelFromNonce(1001),
+				populateDataModelFromNonce(1002),
+				populateDataModelFromNonce(1003),
+				populateDataModelFromNonce(1004),
+			},
+			ExpectedNumDeleted: 5,
+		},
+		{
+			Name: "delete records using query",
+			ToInsert: []single_type.MyDataModel{
+				populateDataModelFromNonce(1000),
+				populateDataModelFromNonce(1001),
+				populateDataModelFromNonce(1002),
+				populateDataModelFromNonce(1002),
+				populateDataModelFromNonce(1003),
+				populateDataModelFromNonce(1004),
+				populateDataModelFromNonce(1002),
+			},
+			Query: queryFromNonce(1002),
+			ExpectedNumDeleted: 3,
+			Expected: []single_type.MyDataModel{
+				populateDataModelFromNonceWithID(1000, 1),
+				populateDataModelFromNonceWithID(1001, 2),
+				populateDataModelFromNonceWithID(1003, 5),
+				populateDataModelFromNonceWithID(1004, 6),
+			},
+		},
+		{
+			Name: "when query contains field not in data model returns error",
+			Query: map[string]any{
+				"some_field_not_in_MyDataModel": 1,
+			},
+			ExpectErr: true,
+		},
+	}
+
+	for _, test := range testCases {
+		t.Run(test.Name, func(t *testing.T) {
+
+			now := time.SetTimeNowForTesting(t).Round(time.Second)
+			ctx := context.Background()
+			db := sqltest.OpenMysql(t, "schema.sql")
+
+			for _, d := range test.ToInsert {
+				_, err := my_data_model.Insert(ctx, db, d)
+				require.NoError(t, err)
+			}
+
+			numDeleted, err := my_data_model.Delete(ctx, db, test.Query)
+			if test.ExpectErr {
+				require.Error(t, err)
+				return
+			}
+			require.NoError(t, err)
+
+			require.Equal(t, test.ExpectedNumDeleted, numDeleted)
+
+			actual, err := my_data_model.Select(ctx, db, nil)
+			require.NoError(t, err)
+
+			require.Equal(t, len(test.Expected), len(actual))
+
+			for i := range actual {
+				test.Expected[i].CreatedAt = now
+				test.Expected[i].UpdatedAt = now
+				assert.LogicallyEqual(t, test.Expected[i], actual[i], fmt.Sprint(i) + "th element not equal")
+			}
 		})
 	}
 }

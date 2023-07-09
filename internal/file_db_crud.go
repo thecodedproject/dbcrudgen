@@ -22,6 +22,7 @@ func fileDBCrud(d pkgDef) func() ([]gopkg.FileContents, error) {
 
 			imports := tmpl.UnnamedImports(
 				"errors",
+				"fmt",
 				"github.com/thecodedproject/gotest/time",
 			)
 
@@ -41,6 +42,8 @@ func fileDBCrud(d pkgDef) func() ([]gopkg.FileContents, error) {
 					selectByIDMethod(d, modelName, modelStruct),
 					selectMethod(d, modelName, modelStruct),
 					updateMethod(d, modelName, modelStruct),
+					updateByIDMethod(d, modelName, modelStruct),
+					deleteMethod(d, modelName, modelStruct),
 					modelContainsFieldMethod(d, modelName, modelStruct),
 				},
 			})
@@ -193,7 +196,7 @@ func selectByIDMethod(
 	}
 
 	if len(r) == 0 {
-		return ` + dbModelType + `{}, errors.New("no such id")
+		return ` + dbModelType + `{}, errors.New("SelectByID: id not found - " + fmt.Sprint(id))
 	}
 
 	if len(r) > 1 {
@@ -278,14 +281,17 @@ func selectMethod(
 	queryVals := make([]any, 0, len(queryParams))
 	i := 0
 	for k, v := range queryParams {
+		if !modelContainsField(k) {
+			return nil, errors.New("Select: no such field to query - " + k)
+		}
+
 		q += k + "=?"
 		i++
 		if i < len(queryParams) {
-			q += ", "
+			q += " and "
 		}
 		queryVals = append(queryVals, v)
 	}
-
 
 	r, err := db.QueryContext(
 		ctx,
@@ -389,7 +395,127 @@ func updateMethod(
 		query += k + "=?"
 		i++
 		if i < len(queryParams) {
-			query += ", "
+			query += " and "
+		}
+
+		queryArgs = append(queryArgs, v)
+	}
+
+	r, err := db.ExecContext(
+		ctx,
+		query,
+		queryArgs...,
+	)
+	if err != nil {
+		return 0, err
+	}
+
+	count, err := r.RowsAffected()
+	if err != nil {
+		return 0, err
+	}
+
+	return count, nil
+`,
+	}
+}
+
+func updateByIDMethod(
+	d pkgDef,
+	modelName string,
+	modelStruct gopkg.TypeStruct,
+) gopkg.DeclFunc {
+
+	//dbTable := strcase.ToSnake(modelName)
+
+	return gopkg.DeclFunc{
+		Name: "UpdateByID",
+		Args: []gopkg.DeclVar{
+			ctxArg(),
+			dbArg(),
+			{
+				Name: "id",
+				Type: gopkg.TypeInt64{},
+			},
+			{
+				Name: "updates",
+				Type: gopkg.TypeMap{
+					KeyType: gopkg.TypeString{},
+					ValueType: gopkg.TypeAny{},
+				},
+			},
+		},
+		ReturnArgs: tmpl.UnnamedReturnArgs(
+			gopkg.TypeError{},
+		),
+		BodyTmpl: `
+	if len(updates) == 0 {
+		return nil
+	}
+
+	n, err := Update(
+		ctx,
+		db,
+		updates,
+		map[string]any{
+			"id": id,
+		},
+	)
+	if err != nil {
+		return err
+	}
+
+	if n == 0 {
+		return errors.New("UpdateByID: no such ID")
+	}
+
+	return nil
+`,
+	}
+}
+
+func deleteMethod(
+	d pkgDef,
+	modelName string,
+	modelStruct gopkg.TypeStruct,
+) gopkg.DeclFunc {
+
+	dbTable := strcase.ToSnake(modelName)
+
+	return gopkg.DeclFunc{
+		Name: "Delete",
+		Args: []gopkg.DeclVar{
+			ctxArg(),
+			dbArg(),
+			{
+				Name: "queryParams",
+				Type: gopkg.TypeMap{
+					KeyType: gopkg.TypeString{},
+					ValueType: gopkg.TypeAny{},
+				},
+			},
+		},
+		ReturnArgs: tmpl.UnnamedReturnArgs(
+			gopkg.TypeInt64{},
+			gopkg.TypeError{},
+		),
+		BodyTmpl: `
+	query := "delete from ` + dbTable + `"
+
+	if len(queryParams) > 0 {
+		query += " where "
+	}
+	i := 0
+	queryArgs := make([]any, 0, len(queryParams))
+	for k, v := range queryParams {
+		if !modelContainsField(k) {
+			return 0, errors.New("Delete: no such field to query - " + k)
+		}
+
+		query += k + "=?"
+		i++
+		if i < len(queryParams) {
+			query += " and "
 		}
 
 		queryArgs = append(queryArgs, v)
