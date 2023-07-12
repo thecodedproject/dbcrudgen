@@ -266,6 +266,30 @@ func Delete(
 	return count, nil
 }
 
+func DeleteByID(
+	ctx context.Context,
+	db *sql.DB,
+	id int64,
+) error {
+
+	n, err := Delete(
+		ctx,
+		db,
+		map[string]any{
+			"id": id,
+		},
+	)
+	if err != nil {
+		return err
+	}
+
+	if n == 0 {
+		return errors.New("DeleteByID: no such ID")
+	}
+
+	return nil
+}
+
 func modelContainsField(field string) bool {
 
 	modelFields := map[string]bool{

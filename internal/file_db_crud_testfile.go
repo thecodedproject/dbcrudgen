@@ -60,6 +60,7 @@ func fileDBCrudTest(d pkgDef) func() ([]gopkg.FileContents, error) {
 					testfuncUpdate(d, modelName, modelStruct),
 					testfuncUpdateByID(d, modelName, modelStruct),
 					testfuncDelete(d, modelName, modelStruct),
+					testfuncDeleteByID(d, modelName, modelStruct),
 				),
 			})
 		}
@@ -568,6 +569,91 @@ func testfuncDelete(
 			require.NoError(t, err)
 
 			require.Equal(t, test.ExpectedNumDeleted, numDeleted)
+
+			actual, err := ` + dbcrudAlias + `.Select(ctx, db, nil)
+			require.NoError(t, err)
+
+			require.Equal(t, len(test.Expected), len(actual))
+
+			for i := range actual {
+				test.Expected[i].CreatedAt = now
+				test.Expected[i].UpdatedAt = now
+				assert.LogicallyEqual(t, test.Expected[i], actual[i], fmt.Sprint(i) + "th element not equal")
+			}
+		})
+	}
+`,
+	}
+}
+
+func testfuncDeleteByID(
+	d pkgDef,
+	modelName string,
+	modelStruct gopkg.TypeStruct,
+) gopkg.DeclFunc {
+
+	dbcrudAlias := strcase.ToSnake(modelName)
+	dbModelType := d.Import.Alias + "." + modelName
+
+	return gopkg.DeclFunc{
+		Name: "TestDeleteByID",
+		Args: []gopkg.DeclVar{
+			testingArg(),
+		},
+		//BodyData: scanArgs,
+		BodyTmpl: `
+
+	testCases := []struct{
+		Name string
+		ToInsert []` + dbModelType + `
+		ID int64
+		Expected []` + dbModelType + `
+		ExpectErr bool
+	}{
+		{
+			Name: "when ID not found returns error",
+			ExpectErr: true,
+		},
+		{
+			Name: "insert many and delete by ID",
+			ToInsert: []` + dbModelType + `{
+				populateDataModelFromNonce(101),
+				populateDataModelFromNonce(102),
+				populateDataModelFromNonce(103),
+				populateDataModelFromNonce(104),
+			},
+			ID: 3,
+			Expected: []` + dbModelType + `{
+				populateDataModelFromNonceWithID(101, 1),
+				populateDataModelFromNonceWithID(102, 2),
+				populateDataModelFromNonceWithID(104, 4),
+			},
+		},
+	}
+
+	for _, test := range testCases {
+		t.Run(test.Name, func(t *testing.T) {
+
+			now := time.SetTimeNowForTesting(t).Round(time.Second)
+			ctx := context.Background()
+			db := sqltest.OpenMysql(t, "schema.sql")
+
+			for _, d := range test.ToInsert {
+				_, err := ` + dbcrudAlias + `.Insert(ctx, db, d)
+				require.NoError(t, err)
+			}
+
+			err := ` + dbcrudAlias + `.DeleteByID(
+				ctx,
+				db,
+				test.ID,
+			)
+
+			if test.ExpectErr {
+				require.Error(t, err)
+				return
+			}
+			require.NoError(t, err)
 
 			actual, err := ` + dbcrudAlias + `.Select(ctx, db, nil)
 			require.NoError(t, err)

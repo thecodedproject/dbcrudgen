@@ -44,6 +44,7 @@ func fileDBCrud(d pkgDef) func() ([]gopkg.FileContents, error) {
 					updateMethod(d, modelName, modelStruct),
 					updateByIDMethod(d, modelName, modelStruct),
 					deleteMethod(d, modelName, modelStruct),
+					deleteByIDMethod(d, modelName, modelStruct),
 					modelContainsFieldMethod(d, modelName, modelStruct),
 				},
 			})
@@ -426,8 +427,6 @@ func updateByIDMethod(
 	modelStruct gopkg.TypeStruct,
 ) gopkg.DeclFunc {
 
-	//dbTable := strcase.ToSnake(modelName)
-
 	return gopkg.DeclFunc{
 		Name: "UpdateByID",
 		Args: []gopkg.DeclVar{
@@ -536,6 +535,46 @@ func deleteMethod(
 	}
 
 	return count, nil
+`,
+	}
+}
+
+func deleteByIDMethod(
+	d pkgDef,
+	modelName string,
+	modelStruct gopkg.TypeStruct,
+) gopkg.DeclFunc {
+
+	return gopkg.DeclFunc{
+		Name: "DeleteByID",
+		Args: []gopkg.DeclVar{
+			ctxArg(),
+			dbArg(),
+			{
+				Name: "id",
+				Type: gopkg.TypeInt64{},
+			},
+		},
+		ReturnArgs: tmpl.UnnamedReturnArgs(
+			gopkg.TypeError{},
+		),
+		BodyTmpl: `
+	n, err := Delete(
+		ctx,
+		db,
+		map[string]any{
+			"id": id,
+		},
+	)
+	if err != nil {
+		return err
+	}
+
+	if n == 0 {
+		return errors.New("DeleteByID: no such ID")
+	}
+
+	return nil
 `,
 	}
 }

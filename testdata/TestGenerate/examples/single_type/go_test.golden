@@ -47,5 +47,11 @@
     --- PASS: TestDelete/empty_query_deletes_all_records (X.XXs)
     --- PASS: TestDelete/delete_records_using_query (X.XXs)
     --- PASS: TestDelete/when_query_contains_field_not_in_data_model_returns_error (X.XXs)
+=== RUN   TestDeleteByID
+=== RUN   TestDeleteByID/when_ID_not_found_returns_error
+=== RUN   TestDeleteByID/insert_many_and_delete_by_ID
+--- PASS: TestDeleteByID (X.XXs)
+    --- PASS: TestDeleteByID/when_ID_not_found_returns_error (X.XXs)
+    --- PASS: TestDeleteByID/insert_many_and_delete_by_ID (X.XXs)
 PASS
 ok  	github.com/thecodedproject/dbcrudgen/examples/single_type/my_data_model	X.XXXs

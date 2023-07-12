@@ -480,3 +480,72 @@ func TestDelete(t *testing.T) {
 	}
 }
 
+func TestDeleteByID(t *testing.T) {
+
+
+	testCases := []struct{
+		Name string
+		ToInsert []single_type.MyDataModel
+		ID int64
+		Expected []single_type.MyDataModel
+		ExpectErr bool
+	}{
+		{
+			Name: "when ID not found returns error",
+			ExpectErr: true,
+		},
+		{
+			Name: "insert many and delete by ID",
+			ToInsert: []single_type.MyDataModel{
+				populateDataModelFromNonce(101),
+				populateDataModelFromNonce(102),
+				populateDataModelFromNonce(103),
+				populateDataModelFromNonce(104),
+			},
+			ID: 3,
+			Expected: []single_type.MyDataModel{
+				populateDataModelFromNonceWithID(101, 1),
+				populateDataModelFromNonceWithID(102, 2),
+				populateDataModelFromNonceWithID(104, 4),
+			},
+		},
+	}
+
+	for _, test := range testCases {
+		t.Run(test.Name, func(t *testing.T) {
+
+			now := time.SetTimeNowForTesting(t).Round(time.Second)
+			ctx := context.Background()
+			db := sqltest.OpenMysql(t, "schema.sql")
+
+			for _, d := range test.ToInsert {
+				_, err := my_data_model.Insert(ctx, db, d)
+				require.NoError(t, err)
+			}
+
+			err := my_data_model.DeleteByID(
+				ctx,
+				db,
+				test.ID,
+			)
+
+			if test.ExpectErr {
+				require.Error(t, err)
+				return
+			}
+			require.NoError(t, err)
+
+			actual, err := my_data_model.Select(ctx, db, nil)
+			require.NoError(t, err)
+
+			require.Equal(t, len(test.Expected), len(actual))
+
+			for i := range actual {
+				test.Expected[i].CreatedAt = now
+				test.Expected[i].UpdatedAt = now
+				assert.LogicallyEqual(t, test.Expected[i], actual[i], fmt.Sprint(i) + "th element not equal")
+			}
+		})
+	}
+}
+
