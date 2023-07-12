@@ -1,6 +1,6 @@
 create table my_data_model (
   id bigint primary key auto_increment,
-  created_at datetime,
+  inserted_at datetime,
   updated_at datetime,
   some_string varchar(255),
   some_int bigint,

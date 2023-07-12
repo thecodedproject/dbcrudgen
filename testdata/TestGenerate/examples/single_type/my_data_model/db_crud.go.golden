@@ -17,7 +17,7 @@ func Insert(
 
 	r, err := db.ExecContext(
 		ctx,
-		"insert into my_data_model set created_at=?, updated_at=?, some_string=?, some_int=?, some_bool=?",
+		"insert into my_data_model set inserted_at=?, updated_at=?, some_string=?, some_int=?, some_bool=?",
 		time.Now(),
 		time.Now(),
 		d.SomeString,
@@ -71,7 +71,7 @@ func Select(
 ) ([]single_type.MyDataModel, error) {
 
 
-	q := "select id, created_at, updated_at, some_string, some_int, (some_bool = '1') from my_data_model"
+	q := "select id, inserted_at, updated_at, some_string, some_int, (some_bool = '1') from my_data_model"
 
 	if len(queryParams) > 0 {
 		q += " where "
@@ -113,7 +113,7 @@ func Select(
 		var d single_type.MyDataModel
 		r.Scan(
 			&d.ID,
-			&d.CreatedAt,
+			&d.InsertedAt,
 			&d.UpdatedAt,
 			&d.SomeString,
 			&d.SomeInt,
@@ -294,7 +294,7 @@ func modelContainsField(field string) bool {
 
 	modelFields := map[string]bool{
 		"id": true,
-		"created_at": true,
+		"inserted_at": true,
 		"updated_at": true,
 		"some_string": true,
 		"some_int": true,

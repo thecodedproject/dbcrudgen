@@ -170,7 +170,7 @@ func testfuncInsertAndSelect(
 
 			for i := range actual {
 
-				test.Expected[i].CreatedAt = now
+				test.Expected[i].InsertedAt = now
 				test.Expected[i].UpdatedAt = now
 
 				assert.LogicallyEqual(t, test.Expected[i], actual[i], fmt.Sprint(i) + "th element not equal")
@@ -244,7 +244,7 @@ func testfuncSelectByID(
 			}
 			require.NoError(t, err)
 
-			test.Expected.CreatedAt = now
+			test.Expected.InsertedAt = now
 			test.Expected.UpdatedAt = now
 
 			assert.LogicallyEqual(t, test.Expected, actual)
@@ -374,7 +374,7 @@ func testfuncUpdate(
 			require.Equal(t, len(test.Expected), len(actual))
 
 			for i := range actual {
-				test.Expected[i].CreatedAt = now
+				test.Expected[i].InsertedAt = now
 				test.Expected[i].UpdatedAt = now
 				assert.LogicallyEqual(t, test.Expected[i], actual[i], fmt.Sprint(i) + "th element not equal")
 			}
@@ -476,7 +476,7 @@ func testfuncUpdateByID(
 			require.Equal(t, len(test.Expected), len(actual))
 
 			for i := range actual {
-				test.Expected[i].CreatedAt = now
+				test.Expected[i].InsertedAt = now
 				test.Expected[i].UpdatedAt = now
 				assert.LogicallyEqual(t, test.Expected[i], actual[i], fmt.Sprint(i) + "th element not equal")
 			}
@@ -576,7 +576,7 @@ func testfuncDelete(
 			require.Equal(t, len(test.Expected), len(actual))
 
 			for i := range actual {
-				test.Expected[i].CreatedAt = now
+				test.Expected[i].InsertedAt = now
 				test.Expected[i].UpdatedAt = now
 				assert.LogicallyEqual(t, test.Expected[i], actual[i], fmt.Sprint(i) + "th element not equal")
 			}
@@ -661,7 +661,7 @@ func testfuncDeleteByID(
 			require.Equal(t, len(test.Expected), len(actual))
 
 			for i := range actual {
-				test.Expected[i].CreatedAt = now
+				test.Expected[i].InsertedAt = now
 				test.Expected[i].UpdatedAt = now
 				assert.LogicallyEqual(t, test.Expected[i], actual[i], fmt.Sprint(i) + "th element not equal")
 			}
@@ -683,7 +683,7 @@ func testHelperMethods(
 	for _, f := range modelStruct.Fields {
 		specialFields := map[string]bool{
 			"ID": true,
-			"CreatedAt": true,
+			"InsertedAt": true,
 			"UpdatedAt": true,
 		}
 

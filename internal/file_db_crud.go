@@ -69,7 +69,7 @@ func insertMethod(
 			continue
 		}
 
-		if field.Name == "CreatedAt" || field.Name == "UpdatedAt" {
+		if field.Name == "InsertedAt" || field.Name == "UpdatedAt" {
 			queryArgs = append(queryArgs, "time.Now()")
 		} else {
 			queryArgs = append(queryArgs, "d." + field.Name)

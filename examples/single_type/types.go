@@ -10,7 +10,7 @@ type MyDataModel struct {
 	dbcrudgen.DataModel
 
 	ID int64
-	CreatedAt time.Time
+	InsertedAt time.Time
 	UpdatedAt time.Time
 	SomeString string
 	SomeInt int64
