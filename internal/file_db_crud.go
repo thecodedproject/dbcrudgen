@@ -23,13 +23,24 @@ func fileDBCrud(d pkgDef) func() ([]gopkg.FileContents, error) {
 			imports := tmpl.UnnamedImports(
 				"errors",
 				"fmt",
-				"github.com/thecodedproject/gotest/time",
 			)
 
 			modelName := model.Name
 			modelStruct, ok := model.Type.(gopkg.TypeStruct)
 			if !ok {
 				return nil, errors.New("found datamodel which is not of type struct")
+			}
+
+			for _, field := range modelStruct.Fields {
+				if field.Name == "InsertedAt" || field.Name == "UpdatedAt" {
+					imports = append(
+						imports,
+						gopkg.ImportAndAlias{
+							Import: "github.com/thecodedproject/gotest/time",
+						},
+					)
+					break
+				}
 			}
 
 			files = append(files, gopkg.FileContents{

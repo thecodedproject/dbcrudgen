@@ -1,0 +1,3 @@
+examples/without_timestamps/entity_without_timestamp/db_crud.go
+examples/without_timestamps/entity_without_timestamp/db_crud_test.go
+examples/without_timestamps/entity_without_timestamp/schema.sql

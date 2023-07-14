@@ -84,8 +84,16 @@ func sqlTypeFromGoType(
 	}
 
 	switch typeStr {
+	case "[]byte":
+		return gosql.TypeVarChar{N: 255}, nil
 	case "bool":
 		return gosql.TypeBit{}, nil
+	case "float32":
+		return gosql.TypeFloat{}, nil
+	case "float64":
+		return gosql.TypeDouble{}, nil
+	case "int32":
+		return gosql.TypeInt{}, nil
 	case "int64":
 		return gosql.TypeBigInt{}, nil
 	case "string":

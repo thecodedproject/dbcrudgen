@@ -1,0 +1,10 @@
+create table entity_without_timestamp (
+  id bigint primary key auto_increment,
+  a_str varchar(255),
+  b_str varchar(255),
+  a_byte_slice varchar(255),
+  a_int_64 bigint,
+  b_int_32 int,
+  a_float_32 float,
+  b_float_64 double
+);

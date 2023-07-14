@@ -10,6 +10,7 @@ import (
 	time "github.com/thecodedproject/gotest/time"
 	sqltest "github.com/thecodedproject/sqltest"
 	testing "testing"
+	time2 "time"
 )
 
 func populateDataModelFromNonce(nonce int64) single_type.MyDataModel {
@@ -21,13 +22,16 @@ func populateDataModelFromNonce(nonce int64) single_type.MyDataModel {
 	}
 }
 
-func populateDataModelFromNonceWithID(
+func populateDataModelFromNonceWithIDAndTimestamp(
 	nonce int64,
 	id int64,
+	t time2.Time,
 ) single_type.MyDataModel {
 
 	d := populateDataModelFromNonce(nonce)
 	d.ID = id
+	d.InsertedAt = t.Round(time.Second)
+	d.UpdatedAt = t.Round(time.Second)
 	return d
 }
 
@@ -41,6 +45,8 @@ func queryFromNonce(nonce int64) map[string]any {
 }
 
 func TestInsertAndSelect(t *testing.T) {
+
+	now := time.SetTimeNowForTesting(t)
 
 	testCases := []struct{
 		Name string
@@ -58,7 +64,7 @@ func TestInsertAndSelect(t *testing.T) {
 				populateDataModelFromNonce(11),
 			},
 			Expected: []single_type.MyDataModel{
-				populateDataModelFromNonceWithID(11, 1),
+				populateDataModelFromNonceWithIDAndTimestamp(11, 1, now),
 			},
 		},
 		{
@@ -70,10 +76,10 @@ func TestInsertAndSelect(t *testing.T) {
 				populateDataModelFromNonce(41),
 			},
 			Expected: []single_type.MyDataModel{
-				populateDataModelFromNonceWithID(11, 1),
-				populateDataModelFromNonceWithID(21, 2),
-				populateDataModelFromNonceWithID(31, 3),
-				populateDataModelFromNonceWithID(41, 4),
+				populateDataModelFromNonceWithIDAndTimestamp(11, 1, now),
+				populateDataModelFromNonceWithIDAndTimestamp(21, 2, now),
+				populateDataModelFromNonceWithIDAndTimestamp(31, 3, now),
+				populateDataModelFromNonceWithIDAndTimestamp(41, 4, now),
 			},
 		},
 		{
@@ -87,9 +93,9 @@ func TestInsertAndSelect(t *testing.T) {
 			},
 			Query: queryFromNonce(45),
 			Expected: []single_type.MyDataModel{
-				populateDataModelFromNonceWithID(45, 2),
-				populateDataModelFromNonceWithID(45, 3),
-				populateDataModelFromNonceWithID(45, 5),
+				populateDataModelFromNonceWithIDAndTimestamp(45, 2, now),
+				populateDataModelFromNonceWithIDAndTimestamp(45, 3, now),
+				populateDataModelFromNonceWithIDAndTimestamp(45, 5, now),
 			},
 		},
 		{
@@ -106,8 +112,6 @@ func TestInsertAndSelect(t *testing.T) {
 
 	for _, test := range testCases {
 		t.Run(test.Name, func(t *testing.T) {
-
-			now := time.SetTimeNowForTesting(t).Round(time.Second)
 
 			ctx := context.Background()
 			db := sqltest.OpenMysql(t, "schema.sql")
@@ -127,10 +131,6 @@ func TestInsertAndSelect(t *testing.T) {
 			require.Equal(t, len(test.Expected), len(actual))
 
 			for i := range actual {
-
-				test.Expected[i].InsertedAt = now
-				test.Expected[i].UpdatedAt = now
-
 				assert.LogicallyEqual(t, test.Expected[i], actual[i], fmt.Sprint(i) + "th element not equal")
 			}
 		})
@@ -138,6 +138,8 @@ func TestInsertAndSelect(t *testing.T) {
 }
 
 func TestSelectByID(t *testing.T) {
+
+	now := time.SetTimeNowForTesting(t)
 
 	testCases := []struct{
 		Name string
@@ -163,14 +165,12 @@ func TestSelectByID(t *testing.T) {
 				populateDataModelFromNonce(300),
 			},
 			ID: 2,
-			Expected: populateDataModelFromNonceWithID(200, 2),
+			Expected: populateDataModelFromNonceWithIDAndTimestamp(200, 2, now),
 		},
 	}
 
 	for _, test := range testCases {
 		t.Run(test.Name, func(t *testing.T) {
-
-			now := time.SetTimeNowForTesting(t).Round(time.Second)
 
 			ctx := context.Background()
 			db := sqltest.OpenMysql(t, "schema.sql")
@@ -187,15 +187,14 @@ func TestSelectByID(t *testing.T) {
 			}
 			require.NoError(t, err)
 
-			test.Expected.InsertedAt = now
-			test.Expected.UpdatedAt = now
-
 			assert.LogicallyEqual(t, test.Expected, actual)
 		})
 	}
 }
 
 func TestUpdate(t *testing.T) {
+
+	now := time.SetTimeNowForTesting(t)
 
 	testCases := []struct{
 		Name string
@@ -235,10 +234,10 @@ func TestUpdate(t *testing.T) {
 			Updates: queryFromNonce(111),
 			ExpectedNumUpdates: 4,
 			Expected: []single_type.MyDataModel{
-				populateDataModelFromNonceWithID(111, 1),
-				populateDataModelFromNonceWithID(111, 2),
-				populateDataModelFromNonceWithID(111, 3),
-				populateDataModelFromNonceWithID(111, 4),
+				populateDataModelFromNonceWithIDAndTimestamp(111, 1, now),
+				populateDataModelFromNonceWithIDAndTimestamp(111, 2, now),
+				populateDataModelFromNonceWithIDAndTimestamp(111, 3, now),
+				populateDataModelFromNonceWithIDAndTimestamp(111, 4, now),
 			},
 		},
 		{
@@ -255,12 +254,12 @@ func TestUpdate(t *testing.T) {
 			Query: queryFromNonce(125),
 			ExpectedNumUpdates: 3,
 			Expected: []single_type.MyDataModel{
-				populateDataModelFromNonceWithID(123, 1),
-				populateDataModelFromNonceWithID(999, 2),
-				populateDataModelFromNonceWithID(124, 3),
-				populateDataModelFromNonceWithID(999, 4),
-				populateDataModelFromNonceWithID(126, 5),
-				populateDataModelFromNonceWithID(999, 6),
+				populateDataModelFromNonceWithIDAndTimestamp(123, 1, now),
+				populateDataModelFromNonceWithIDAndTimestamp(999, 2, now),
+				populateDataModelFromNonceWithIDAndTimestamp(124, 3, now),
+				populateDataModelFromNonceWithIDAndTimestamp(999, 4, now),
+				populateDataModelFromNonceWithIDAndTimestamp(126, 5, now),
+				populateDataModelFromNonceWithIDAndTimestamp(999, 6, now),
 			},
 		},
 	}
@@ -268,7 +267,6 @@ func TestUpdate(t *testing.T) {
 	for _, test := range testCases {
 		t.Run(test.Name, func(t *testing.T) {
 
-			now := time.SetTimeNowForTesting(t).Round(time.Second)
 			ctx := context.Background()
 			db := sqltest.OpenMysql(t, "schema.sql")
 
@@ -301,8 +299,6 @@ func TestUpdate(t *testing.T) {
 			require.Equal(t, len(test.Expected), len(actual))
 
 			for i := range actual {
-				test.Expected[i].InsertedAt = now
-				test.Expected[i].UpdatedAt = now
 				assert.LogicallyEqual(t, test.Expected[i], actual[i], fmt.Sprint(i) + "th element not equal")
 			}
 		})
@@ -311,6 +307,7 @@ func TestUpdate(t *testing.T) {
 
 func TestUpdateByID(t *testing.T) {
 
+	now := time.SetTimeNowForTesting(t)
 
 	testCases := []struct{
 		Name string
@@ -348,10 +345,10 @@ func TestUpdateByID(t *testing.T) {
 			ID: 3,
 			Updates: queryFromNonce(555),
 			Expected: []single_type.MyDataModel{
-				populateDataModelFromNonceWithID(101, 1),
-				populateDataModelFromNonceWithID(102, 2),
-				populateDataModelFromNonceWithID(555, 3),
-				populateDataModelFromNonceWithID(104, 4),
+				populateDataModelFromNonceWithIDAndTimestamp(101, 1, now),
+				populateDataModelFromNonceWithIDAndTimestamp(102, 2, now),
+				populateDataModelFromNonceWithIDAndTimestamp(555, 3, now),
+				populateDataModelFromNonceWithIDAndTimestamp(104, 4, now),
 			},
 		},
 	}
@@ -359,7 +356,6 @@ func TestUpdateByID(t *testing.T) {
 	for _, test := range testCases {
 		t.Run(test.Name, func(t *testing.T) {
 
-			now := time.SetTimeNowForTesting(t).Round(time.Second)
 			ctx := context.Background()
 			db := sqltest.OpenMysql(t, "schema.sql")
 
@@ -387,8 +383,6 @@ func TestUpdateByID(t *testing.T) {
 			require.Equal(t, len(test.Expected), len(actual))
 
 			for i := range actual {
-				test.Expected[i].InsertedAt = now
-				test.Expected[i].UpdatedAt = now
 				assert.LogicallyEqual(t, test.Expected[i], actual[i], fmt.Sprint(i) + "th element not equal")
 			}
 		})
@@ -396,6 +390,8 @@ func TestUpdateByID(t *testing.T) {
 }
 
 func TestDelete(t *testing.T) {
+
+	now := time.SetTimeNowForTesting(t)
 
 	testCases := []struct{
 		Name string
@@ -430,10 +426,10 @@ func TestDelete(t *testing.T) {
 			Query: queryFromNonce(1002),
 			ExpectedNumDeleted: 3,
 			Expected: []single_type.MyDataModel{
-				populateDataModelFromNonceWithID(1000, 1),
-				populateDataModelFromNonceWithID(1001, 2),
-				populateDataModelFromNonceWithID(1003, 5),
-				populateDataModelFromNonceWithID(1004, 6),
+				populateDataModelFromNonceWithIDAndTimestamp(1000, 1, now),
+				populateDataModelFromNonceWithIDAndTimestamp(1001, 2, now),
+				populateDataModelFromNonceWithIDAndTimestamp(1003, 5, now),
+				populateDataModelFromNonceWithIDAndTimestamp(1004, 6, now),
 			},
 		},
 		{
@@ -448,7 +444,6 @@ func TestDelete(t *testing.T) {
 	for _, test := range testCases {
 		t.Run(test.Name, func(t *testing.T) {
 
-			now := time.SetTimeNowForTesting(t).Round(time.Second)
 			ctx := context.Background()
 			db := sqltest.OpenMysql(t, "schema.sql")
 
@@ -472,8 +467,6 @@ func TestDelete(t *testing.T) {
 			require.Equal(t, len(test.Expected), len(actual))
 
 			for i := range actual {
-				test.Expected[i].InsertedAt = now
-				test.Expected[i].UpdatedAt = now
 				assert.LogicallyEqual(t, test.Expected[i], actual[i], fmt.Sprint(i) + "th element not equal")
 			}
 		})
@@ -482,6 +475,7 @@ func TestDelete(t *testing.T) {
 
 func TestDeleteByID(t *testing.T) {
 
+	now := time.SetTimeNowForTesting(t)
 
 	testCases := []struct{
 		Name string
@@ -504,9 +498,9 @@ func TestDeleteByID(t *testing.T) {
 			},
 			ID: 3,
 			Expected: []single_type.MyDataModel{
-				populateDataModelFromNonceWithID(101, 1),
-				populateDataModelFromNonceWithID(102, 2),
-				populateDataModelFromNonceWithID(104, 4),
+				populateDataModelFromNonceWithIDAndTimestamp(101, 1, now),
+				populateDataModelFromNonceWithIDAndTimestamp(102, 2, now),
+				populateDataModelFromNonceWithIDAndTimestamp(104, 4, now),
 			},
 		},
 	}
@@ -514,7 +508,6 @@ func TestDeleteByID(t *testing.T) {
 	for _, test := range testCases {
 		t.Run(test.Name, func(t *testing.T) {
 
-			now := time.SetTimeNowForTesting(t).Round(time.Second)
 			ctx := context.Background()
 			db := sqltest.OpenMysql(t, "schema.sql")
 
@@ -541,8 +534,6 @@ func TestDeleteByID(t *testing.T) {
 			require.Equal(t, len(test.Expected), len(actual))
 
 			for i := range actual {
-				test.Expected[i].InsertedAt = now
-				test.Expected[i].UpdatedAt = now
 				assert.LogicallyEqual(t, test.Expected[i], actual[i], fmt.Sprint(i) + "th element not equal")
 			}
 		})

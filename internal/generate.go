@@ -6,8 +6,6 @@ import (
 
 	"github.com/thecodedproject/gopkg"
 	"github.com/thecodedproject/gopkg/tmpl"
-
-	"fmt"
 )
 
 var (
@@ -87,17 +85,12 @@ func findDataModels(
 		Import: "github.com/thecodedproject/dbcrudgen/dbcrudgen",
 	}
 
-	// TODO Not sure what bound to add here so added 100; do better...
-	models := make([]gopkg.DeclType, 0, 100)
-
+	models := make([]gopkg.DeclType, 0)
 	for _, file := range p {
 		for _, typeDecl := range file.Types {
 			s, isStruct := typeDecl.Type.(gopkg.TypeStruct)
 			if isStruct {
-
-
 				for _, e := range s.Embeds {
-					fmt.Println(typeDecl.Name, e)
 					if e == dataModelEmbedType {
 						models = append(models, typeDecl)
 					}
@@ -105,8 +98,6 @@ func findDataModels(
 			}
 		}
 	}
-
-	fmt.Println("hello", models)
 
 	return models, nil
 }
