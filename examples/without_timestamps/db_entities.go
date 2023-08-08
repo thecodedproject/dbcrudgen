@@ -1,4 +1,4 @@
-package single_type
+package without_timestamps
 
 import (
 

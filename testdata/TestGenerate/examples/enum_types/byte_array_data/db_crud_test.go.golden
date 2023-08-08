@@ -1,97 +1,52 @@
-package internal
+package byte_array_data_test
 
 import (
-	"errors"
-	"path"
-	"path/filepath"
-	"strings"
-
-	"github.com/iancoleman/strcase"
-	"github.com/thecodedproject/gopkg"
-	"github.com/thecodedproject/gopkg/tmpl"
+	context "context"
+	fmt "fmt"
+	require "github.com/stretchr/testify/require"
+	enum_types "github.com/thecodedproject/dbcrudgen/examples/enum_types"
+	byte_array_data "github.com/thecodedproject/dbcrudgen/examples/enum_types/byte_array_data"
+	assert "github.com/thecodedproject/gotest/assert"
+	time "github.com/thecodedproject/gotest/time"
+	sqltest "github.com/thecodedproject/sqltest"
+	testing "testing"
+	time2 "time"
 )
 
-func fileDBCrudTest(d pkgDef) func() ([]gopkg.FileContents, error) {
+func populateDataModelFromNonce(nonce int64) enum_types.ByteArrayData {
 
-	return func() ([]gopkg.FileContents, error) {
-
-		files := make([]gopkg.FileContents, 0, len(d.DBDataModels))
-		for _, model := range d.DBDataModels {
-
-			dbcrudDir := strcase.ToSnake(model.Name)
-			dbcrudAlias := dbcrudDir
-			dbcrudImport := path.Join(d.Import.Import, dbcrudDir)
-
-			modelName := model.Name
-			modelStruct, ok := model.Type.(gopkg.TypeStruct)
-			if !ok {
-				return nil, errors.New("found datamodel which is not of type struct")
-			}
-
-			imports := tmpl.UnnamedImports(
-				"context",
-				"fmt",
-				"github.com/stretchr/testify/require",
-				"github.com/thecodedproject/sqltest",
-				"github.com/thecodedproject/gotest/assert",
-				"github.com/thecodedproject/gotest/time",
-			)
-			imports = append(imports,
-				gopkg.ImportAndAlias{
-					Import: dbcrudImport,
-					Alias: dbcrudAlias,
-				},
-				d.Import,
-			)
-
-			helpers, err := testHelperMethods(d, modelName, modelStruct)
-			if err != nil {
-				return nil, err
-			}
-
-			files = append(files, gopkg.FileContents{
-				Filepath: filepath.Join(d.OutputPath, dbcrudDir, "db_crud_test.go"),
-				PackageName: dbcrudAlias + "_test",
-				PackageImportPath: dbcrudImport + "_test",
-				Imports: imports,
-				Functions: append(
-					helpers,
-					testfuncInsertAndSelect(d, modelName, modelStruct),
-					testfuncSelectByID(d, modelName, modelStruct),
-					testfuncUpdate(d, modelName, modelStruct),
-					testfuncUpdateByID(d, modelName, modelStruct),
-					testfuncDelete(d, modelName, modelStruct),
-					testfuncDeleteByID(d, modelName, modelStruct),
-				),
-			})
-		}
-
-		return files, nil
+	return enum_types.ByteArrayData{
+		Enum: enum_types.ByteArrayEnum([]byte("some_bytes" + fmt.Sprint(nonce))),
 	}
 }
 
-func testfuncInsertAndSelect(
-	d pkgDef,
-	modelName string,
-	modelStruct gopkg.TypeStruct,
-) gopkg.DeclFunc {
+func populateDataModelFromNonceWithIDAndTimestamp(
+	nonce int64,
+	id int64,
+	t time2.Time,
+) enum_types.ByteArrayData {
 
-	dbcrudAlias := strcase.ToSnake(modelName)
-	dbModelType := d.Import.Alias + "." + modelName
+	d := populateDataModelFromNonce(nonce)
+	d.ID = id
+	return d
+}
 
-	return gopkg.DeclFunc{
-		Name: "TestInsertAndSelect",
-		Args: []gopkg.DeclVar{
-			testingArg(),
-		},
-		BodyTmpl: `
+func queryFromNonce(nonce int64) map[string]any {
+
+	return map[string]any{
+		"enum": enum_types.ByteArrayEnum([]byte("some_bytes" + fmt.Sprint(nonce))),
+	}
+}
+
+func TestInsertAndSelect(t *testing.T) {
+
 	now := time.SetTimeNowForTesting(t)
 
 	testCases := []struct{
 		Name string
-		ToInsert []` + dbModelType + `
+		ToInsert []enum_types.ByteArrayData
 		Query map[string]any
-		Expected []` + dbModelType + `
+		Expected []enum_types.ByteArrayData
 		ExpectErr bool
 	}{
 		{
@@ -99,22 +54,22 @@ func testfuncInsertAndSelect(
 		},
 		{
 			Name: "insert one and select",
-			ToInsert: []` + dbModelType + `{
+			ToInsert: []enum_types.ByteArrayData{
 				populateDataModelFromNonce(11),
 			},
-			Expected: []` + dbModelType + `{
+			Expected: []enum_types.ByteArrayData{
 				populateDataModelFromNonceWithIDAndTimestamp(11, 1, now),
 			},
 		},
 		{
 			Name: "insert many and select",
-			ToInsert: []` + dbModelType + `{
+			ToInsert: []enum_types.ByteArrayData{
 				populateDataModelFromNonce(11),
 				populateDataModelFromNonce(21),
 				populateDataModelFromNonce(31),
 				populateDataModelFromNonce(41),
 			},
-			Expected: []` + dbModelType + `{
+			Expected: []enum_types.ByteArrayData{
 				populateDataModelFromNonceWithIDAndTimestamp(11, 1, now),
 				populateDataModelFromNonceWithIDAndTimestamp(21, 2, now),
 				populateDataModelFromNonceWithIDAndTimestamp(31, 3, now),
@@ -123,7 +78,7 @@ func testfuncInsertAndSelect(
 		},
 		{
 			Name: "insert many and select with query",
-			ToInsert: []` + dbModelType + `{
+			ToInsert: []enum_types.ByteArrayData{
 				populateDataModelFromNonce(22),
 				populateDataModelFromNonce(45),
 				populateDataModelFromNonce(45),
@@ -131,7 +86,7 @@ func testfuncInsertAndSelect(
 				populateDataModelFromNonce(45),
 			},
 			Query: queryFromNonce(45),
-			Expected: []` + dbModelType + `{
+			Expected: []enum_types.ByteArrayData{
 				populateDataModelFromNonceWithIDAndTimestamp(45, 2, now),
 				populateDataModelFromNonceWithIDAndTimestamp(45, 3, now),
 				populateDataModelFromNonceWithIDAndTimestamp(45, 5, now),
@@ -139,11 +94,11 @@ func testfuncInsertAndSelect(
 		},
 		{
 			Name: "select query field which is not in data model returns error",
-			ToInsert: []` + dbModelType + `{
+			ToInsert: []enum_types.ByteArrayData{
 				populateDataModelFromNonce(1),
 			},
 			Query: map[string]any{
-				"some_field_not_in_` + modelName + `": 1,
+				"some_field_not_in_ByteArrayData": 1,
 			},
 			ExpectErr: true,
 		},
@@ -156,11 +111,11 @@ func testfuncInsertAndSelect(
 			db := sqltest.OpenMysql(t, "schema.sql")
 
 			for _, d := range test.ToInsert {
-				_, err := ` + dbcrudAlias + `.Insert(ctx, db, d)
+				_, err := byte_array_data.Insert(ctx, db, d)
 				require.NoError(t, err)
 			}
 
-			actual, err := ` + dbcrudAlias + `.Select(ctx, db, test.Query)
+			actual, err := byte_array_data.Select(ctx, db, test.Query)
 			if test.ExpectErr {
 				require.Error(t, err)
 				return
@@ -174,37 +129,22 @@ func testfuncInsertAndSelect(
 			}
 		})
 	}
-`,
-	}
 }
 
-func testfuncSelectByID(
-	d pkgDef,
-	modelName string,
-	modelStruct gopkg.TypeStruct,
-) gopkg.DeclFunc {
+func TestSelectByID(t *testing.T) {
 
-	dbcrudAlias := strcase.ToSnake(modelName)
-	dbModelType := d.Import.Alias + "." + modelName
-
-	return gopkg.DeclFunc{
-		Name: "TestSelectByID",
-		Args: []gopkg.DeclVar{
-			testingArg(),
-		},
-		BodyTmpl: `
 	now := time.SetTimeNowForTesting(t)
 
 	testCases := []struct{
 		Name string
-		ToInsert []` + dbModelType + `
+		ToInsert []enum_types.ByteArrayData
 		ID int64
-		Expected ` + dbModelType + `
+		Expected enum_types.ByteArrayData
 		ExpectErr bool
 	}{
 		{
 			Name: "when ID not found returns error",
-			ToInsert: []` + dbModelType + `{
+			ToInsert: []enum_types.ByteArrayData{
 				populateDataModelFromNonce(100),
 				populateDataModelFromNonce(200),
 			},
@@ -213,7 +153,7 @@ func testfuncSelectByID(
 		},
 		{
 			Name: "when ID is found returns row",
-			ToInsert: []` + dbModelType + `{
+			ToInsert: []enum_types.ByteArrayData{
 				populateDataModelFromNonce(100),
 				populateDataModelFromNonce(200),
 				populateDataModelFromNonce(300),
@@ -230,11 +170,11 @@ func testfuncSelectByID(
 			db := sqltest.OpenMysql(t, "schema.sql")
 
 			for _, d := range test.ToInsert {
-				_, err := ` + dbcrudAlias + `.Insert(ctx, db, d)
+				_, err := byte_array_data.Insert(ctx, db, d)
 				require.NoError(t, err)
 			}
 
-			actual, err := ` + dbcrudAlias + `.SelectByID(ctx, db, test.ID)
+			actual, err := byte_array_data.SelectByID(ctx, db, test.ID)
 			if test.ExpectErr {
 				require.Error(t, err)
 				return
@@ -244,35 +184,19 @@ func testfuncSelectByID(
 			assert.LogicallyEqual(t, test.Expected, actual)
 		})
 	}
-`,
-	}
 }
 
-func testfuncUpdate(
-	d pkgDef,
-	modelName string,
-	modelStruct gopkg.TypeStruct,
-) gopkg.DeclFunc {
+func TestUpdate(t *testing.T) {
 
-	dbcrudAlias := strcase.ToSnake(modelName)
-	dbModelType := d.Import.Alias + "." + modelName
-
-	return gopkg.DeclFunc{
-		Name: "TestUpdate",
-		Args: []gopkg.DeclVar{
-			testingArg(),
-		},
-		//BodyData: scanArgs,
-		BodyTmpl: `
 	now := time.SetTimeNowForTesting(t)
 
 	testCases := []struct{
 		Name string
-		ToInsert []` + dbModelType + `
+		ToInsert []enum_types.ByteArrayData
 		Updates map[string]any
 		Query map[string]any
 		ExpectedNumUpdates int64
-		Expected []` + dbModelType + `
+		Expected []enum_types.ByteArrayData
 		ExpectErr bool
 	}{
 		{
@@ -281,7 +205,7 @@ func testfuncUpdate(
 		{
 			Name: "update unknown field throws error",
 			Updates: map[string]any{
-				"field_not_in_the_` + dbModelType + `_type": "update",
+				"field_not_in_the_enum_types.ByteArrayData_type": "update",
 			},
 			ExpectErr: true,
 		},
@@ -289,13 +213,13 @@ func testfuncUpdate(
 			Name: "query unknown field throws error",
 			Updates: queryFromNonce(1),
 			Query: map[string]any{
-				"field_not_in_` + modelName + `": "update",
+				"field_not_in_ByteArrayData": "update",
 			},
 			ExpectErr: true,
 		},
 		{
 			Name: "update all records",
-			ToInsert: []` + dbModelType + `{
+			ToInsert: []enum_types.ByteArrayData{
 				populateDataModelFromNonce(123),
 				populateDataModelFromNonce(124),
 				populateDataModelFromNonce(125),
@@ -303,7 +227,7 @@ func testfuncUpdate(
 			},
 			Updates: queryFromNonce(111),
 			ExpectedNumUpdates: 4,
-			Expected: []` + dbModelType + `{
+			Expected: []enum_types.ByteArrayData{
 				populateDataModelFromNonceWithIDAndTimestamp(111, 1, now),
 				populateDataModelFromNonceWithIDAndTimestamp(111, 2, now),
 				populateDataModelFromNonceWithIDAndTimestamp(111, 3, now),
@@ -312,7 +236,7 @@ func testfuncUpdate(
 		},
 		{
 			Name: "update records with query",
-			ToInsert: []` + dbModelType + `{
+			ToInsert: []enum_types.ByteArrayData{
 				populateDataModelFromNonce(123),
 				populateDataModelFromNonce(125),
 				populateDataModelFromNonce(124),
@@ -323,7 +247,7 @@ func testfuncUpdate(
 			Updates: queryFromNonce(999),
 			Query: queryFromNonce(125),
 			ExpectedNumUpdates: 3,
-			Expected: []` + dbModelType + `{
+			Expected: []enum_types.ByteArrayData{
 				populateDataModelFromNonceWithIDAndTimestamp(123, 1, now),
 				populateDataModelFromNonceWithIDAndTimestamp(999, 2, now),
 				populateDataModelFromNonceWithIDAndTimestamp(124, 3, now),
@@ -341,7 +265,7 @@ func testfuncUpdate(
 			db := sqltest.OpenMysql(t, "schema.sql")
 
 			for _, d := range test.ToInsert {
-				_, err := ` + dbcrudAlias + `.Insert(
+				_, err := byte_array_data.Insert(
 					ctx,
 					db,
 					d,
@@ -349,7 +273,7 @@ func testfuncUpdate(
 				require.NoError(t, err)
 			}
 
-			numUpdates, err := ` + dbcrudAlias + `.Update(
+			numUpdates, err := byte_array_data.Update(
 				ctx,
 				db,
 				test.Updates,
@@ -363,7 +287,7 @@ func testfuncUpdate(
 
 			require.Equal(t, test.ExpectedNumUpdates, numUpdates)
 
-			actual, err := ` + dbcrudAlias + `.Select(ctx, db, nil)
+			actual, err := byte_array_data.Select(ctx, db, nil)
 			require.NoError(t, err)
 
 			require.Equal(t, len(test.Expected), len(actual))
@@ -373,33 +297,18 @@ func testfuncUpdate(
 			}
 		})
 	}
-`,
-	}
 }
 
-func testfuncUpdateByID(
-	d pkgDef,
-	modelName string,
-	modelStruct gopkg.TypeStruct,
-) gopkg.DeclFunc {
+func TestUpdateByID(t *testing.T) {
 
-	dbcrudAlias := strcase.ToSnake(modelName)
-	dbModelType := d.Import.Alias + "." + modelName
-
-	return gopkg.DeclFunc{
-		Name: "TestUpdateByID",
-		Args: []gopkg.DeclVar{
-			testingArg(),
-		},
-		BodyTmpl: `
 	now := time.SetTimeNowForTesting(t)
 
 	testCases := []struct{
 		Name string
-		ToInsert []` + dbModelType + `
+		ToInsert []enum_types.ByteArrayData
 		ID int64
 		Updates map[string]any
-		Expected []` + dbModelType + `
+		Expected []enum_types.ByteArrayData
 		ExpectErr bool
 	}{
 		{
@@ -415,13 +324,13 @@ func testfuncUpdateByID(
 			Name: "when update field not in schema throws error",
 			ID: 1,
 			Updates: map[string]any{
-				"field_not_in_the_` + dbModelType + `_type": "update",
+				"field_not_in_the_enum_types.ByteArrayData_type": "update",
 			},
 			ExpectErr: true,
 		},
 		{
 			Name: "insert many and update one by id",
-			ToInsert: []` + dbModelType + `{
+			ToInsert: []enum_types.ByteArrayData{
 				populateDataModelFromNonce(101),
 				populateDataModelFromNonce(102),
 				populateDataModelFromNonce(103),
@@ -429,7 +338,7 @@ func testfuncUpdateByID(
 			},
 			ID: 3,
 			Updates: queryFromNonce(555),
-			Expected: []` + dbModelType + `{
+			Expected: []enum_types.ByteArrayData{
 				populateDataModelFromNonceWithIDAndTimestamp(101, 1, now),
 				populateDataModelFromNonceWithIDAndTimestamp(102, 2, now),
 				populateDataModelFromNonceWithIDAndTimestamp(555, 3, now),
@@ -445,11 +354,11 @@ func testfuncUpdateByID(
 			db := sqltest.OpenMysql(t, "schema.sql")
 
 			for _, d := range test.ToInsert {
-				_, err := ` + dbcrudAlias + `.Insert(ctx, db, d)
+				_, err := byte_array_data.Insert(ctx, db, d)
 				require.NoError(t, err)
 			}
 
-			err := ` + dbcrudAlias + `.UpdateByID(
+			err := byte_array_data.UpdateByID(
 				ctx,
 				db,
 				test.ID,
@@ -462,7 +371,7 @@ func testfuncUpdateByID(
 			}
 			require.NoError(t, err)
 
-			actual, err := ` + dbcrudAlias + `.Select(ctx, db, nil)
+			actual, err := byte_array_data.Select(ctx, db, nil)
 			require.NoError(t, err)
 
 			require.Equal(t, len(test.Expected), len(actual))
@@ -472,38 +381,23 @@ func testfuncUpdateByID(
 			}
 		})
 	}
-`,
-	}
 }
 
-func testfuncDelete(
-	d pkgDef,
-	modelName string,
-	modelStruct gopkg.TypeStruct,
-) gopkg.DeclFunc {
+func TestDelete(t *testing.T) {
 
-	dbcrudAlias := strcase.ToSnake(modelName)
-	dbModelType := d.Import.Alias + "." + modelName
-
-	return gopkg.DeclFunc{
-		Name: "TestDelete",
-		Args: []gopkg.DeclVar{
-			testingArg(),
-		},
-		BodyTmpl: `
 	now := time.SetTimeNowForTesting(t)
 
 	testCases := []struct{
 		Name string
-		ToInsert []` + dbModelType + `
+		ToInsert []enum_types.ByteArrayData
 		Query map[string]any
 		ExpectedNumDeleted int64
-		Expected []` + dbModelType + `
+		Expected []enum_types.ByteArrayData
 		ExpectErr bool
 	}{
 		{
 			Name: "empty query deletes all records",
-			ToInsert: []` + dbModelType + `{
+			ToInsert: []enum_types.ByteArrayData{
 				populateDataModelFromNonce(1000),
 				populateDataModelFromNonce(1001),
 				populateDataModelFromNonce(1002),
@@ -514,7 +408,7 @@ func testfuncDelete(
 		},
 		{
 			Name: "delete records using query",
-			ToInsert: []` + dbModelType + `{
+			ToInsert: []enum_types.ByteArrayData{
 				populateDataModelFromNonce(1000),
 				populateDataModelFromNonce(1001),
 				populateDataModelFromNonce(1002),
@@ -525,7 +419,7 @@ func testfuncDelete(
 			},
 			Query: queryFromNonce(1002),
 			ExpectedNumDeleted: 3,
-			Expected: []` + dbModelType + `{
+			Expected: []enum_types.ByteArrayData{
 				populateDataModelFromNonceWithIDAndTimestamp(1000, 1, now),
 				populateDataModelFromNonceWithIDAndTimestamp(1001, 2, now),
 				populateDataModelFromNonceWithIDAndTimestamp(1003, 5, now),
@@ -535,7 +429,7 @@ func testfuncDelete(
 		{
 			Name: "when query contains field not in data model returns error",
 			Query: map[string]any{
-				"some_field_not_in_` + modelName + `": 1,
+				"some_field_not_in_ByteArrayData": 1,
 			},
 			ExpectErr: true,
 		},
@@ -548,11 +442,11 @@ func testfuncDelete(
 			db := sqltest.OpenMysql(t, "schema.sql")
 
 			for _, d := range test.ToInsert {
-				_, err := ` + dbcrudAlias + `.Insert(ctx, db, d)
+				_, err := byte_array_data.Insert(ctx, db, d)
 				require.NoError(t, err)
 			}
 
-			numDeleted, err := ` + dbcrudAlias + `.Delete(ctx, db, test.Query)
+			numDeleted, err := byte_array_data.Delete(ctx, db, test.Query)
 			if test.ExpectErr {
 				require.Error(t, err)
 				return
@@ -561,7 +455,7 @@ func testfuncDelete(
 
 			require.Equal(t, test.ExpectedNumDeleted, numDeleted)
 
-			actual, err := ` + dbcrudAlias + `.Select(ctx, db, nil)
+			actual, err := byte_array_data.Select(ctx, db, nil)
 			require.NoError(t, err)
 
 			require.Equal(t, len(test.Expected), len(actual))
@@ -571,32 +465,17 @@ func testfuncDelete(
 			}
 		})
 	}
-`,
-	}
 }
 
-func testfuncDeleteByID(
-	d pkgDef,
-	modelName string,
-	modelStruct gopkg.TypeStruct,
-) gopkg.DeclFunc {
+func TestDeleteByID(t *testing.T) {
 
-	dbcrudAlias := strcase.ToSnake(modelName)
-	dbModelType := d.Import.Alias + "." + modelName
-
-	return gopkg.DeclFunc{
-		Name: "TestDeleteByID",
-		Args: []gopkg.DeclVar{
-			testingArg(),
-		},
-		BodyTmpl: `
 	now := time.SetTimeNowForTesting(t)
 
 	testCases := []struct{
 		Name string
-		ToInsert []` + dbModelType + `
+		ToInsert []enum_types.ByteArrayData
 		ID int64
-		Expected []` + dbModelType + `
+		Expected []enum_types.ByteArrayData
 		ExpectErr bool
 	}{
 		{
@@ -605,14 +484,14 @@ func testfuncDeleteByID(
 		},
 		{
 			Name: "insert many and delete by ID",
-			ToInsert: []` + dbModelType + `{
+			ToInsert: []enum_types.ByteArrayData{
 				populateDataModelFromNonce(101),
 				populateDataModelFromNonce(102),
 				populateDataModelFromNonce(103),
 				populateDataModelFromNonce(104),
 			},
 			ID: 3,
-			Expected: []` + dbModelType + `{
+			Expected: []enum_types.ByteArrayData{
 				populateDataModelFromNonceWithIDAndTimestamp(101, 1, now),
 				populateDataModelFromNonceWithIDAndTimestamp(102, 2, now),
 				populateDataModelFromNonceWithIDAndTimestamp(104, 4, now),
@@ -627,11 +506,11 @@ func testfuncDeleteByID(
 			db := sqltest.OpenMysql(t, "schema.sql")
 
 			for _, d := range test.ToInsert {
-				_, err := ` + dbcrudAlias + `.Insert(ctx, db, d)
+				_, err := byte_array_data.Insert(ctx, db, d)
 				require.NoError(t, err)
 			}
 
-			err := ` + dbcrudAlias + `.DeleteByID(
+			err := byte_array_data.DeleteByID(
 				ctx,
 				db,
 				test.ID,
@@ -643,7 +522,7 @@ func testfuncDeleteByID(
 			}
 			require.NoError(t, err)
 
-			actual, err := ` + dbcrudAlias + `.Select(ctx, db, nil)
+			actual, err := byte_array_data.Select(ctx, db, nil)
 			require.NoError(t, err)
 
 			require.Equal(t, len(test.Expected), len(actual))
@@ -653,196 +532,5 @@ func testfuncDeleteByID(
 			}
 		})
 	}
-`,
-	}
 }
 
-func testHelperMethods(
-	d pkgDef,
-	modelName string,
-	modelStruct gopkg.TypeStruct,
-) ([]gopkg.DeclFunc, error) {
-
-	dbModelType := d.Import.Alias + "." + modelName
-
-	fieldVaules := make(map[string]string)
-	specialTimeFields := make([]string, 0, len(modelStruct.Fields))
-	for _, f := range modelStruct.Fields {
-		specialFields := map[string]bool{
-			"ID": true,
-			"InsertedAt": true,
-			"UpdatedAt": true,
-		}
-
-		if specialFields[f.Name] {
-			if f.Name != "ID" {
-				specialTimeFields = append(specialTimeFields, f.Name)
-			}
-			continue
-		}
-
-		val, err := randomDataForFieldType(f.Type, d.PkgTypes)
-		if err != nil {
-			return nil, err
-		}
-
-		fieldVaules[f.Name] = val
-	}
-
-	return []gopkg.DeclFunc{
-		{
-			Name: "populateDataModelFromNonce",
-			Args: []gopkg.DeclVar{
-				{
-					Name: "nonce",
-					Type: gopkg.TypeInt64{},
-				},
-			},
-			ReturnArgs: tmpl.UnnamedReturnArgs(
-				gopkg.TypeNamed{
-					Name: modelName,
-					Import: d.Import.Import,
-				},
-			),
-			BodyData: fieldVaules,
-			BodyTmpl: `
-	return ` + dbModelType + `{
-{{- range $field, $val := .BodyData}}
-		{{$field}}: {{$val}},
-{{- end}}
-	}
-`,
-		},
-		{
-			Name: "populateDataModelFromNonceWithIDAndTimestamp",
-			Args: []gopkg.DeclVar{
-				{
-					Name: "nonce",
-					Type: gopkg.TypeInt64{},
-				},
-				{
-					Name: "id",
-					Type: gopkg.TypeInt64{},
-				},
-				{
-					Name: "t",
-					Type: gopkg.TypeNamed{
-						Name: "Time",
-						Import: "time",
-					},
-				},
-			},
-			ReturnArgs: tmpl.UnnamedReturnArgs(
-				gopkg.TypeNamed{
-					Name: modelName,
-					Import: d.Import.Import,
-				},
-			),
-			BodyData: specialTimeFields,
-			BodyTmpl: `
-	d := populateDataModelFromNonce(nonce)
-	d.ID = id
-{{- range .BodyData}}
-	d.{{.}} = t.Round(time.Second)
-{{- end}}
-	return d
-`,
-		},
-		{
-			Name: "queryFromNonce",
-			Args: []gopkg.DeclVar{
-				{
-					Name: "nonce",
-					Type: gopkg.TypeInt64{},
-				},
-			},
-			ReturnArgs: tmpl.UnnamedReturnArgs(
-				gopkg.TypeMap{
-					KeyType: gopkg.TypeString{},
-					ValueType: gopkg.TypeAny{},
-				},
-			),
-			BodyData: fieldVaules,
-			BodyTmpl: `
-	return map[string]any{
-{{- range $field, $val := .BodyData}}
-		"{{ToSnake $field}}": {{$val}},
-{{- end}}
-	}
-`,
-		},
-	}, nil
-}
-
-func testingArg() gopkg.DeclVar {
-	return gopkg.DeclVar{
-		Name: "t",
-		Type: gopkg.TypePointer{
-			ValueType: gopkg.TypeNamed{
-				Name: "T",
-				Import: "testing",
-			},
-		},
-	}
-}
-
-func randomDataForFieldType(
-	goType gopkg.Type,
-	enumTypes []gopkg.DeclType,
-) (string, error) {
-
-	if t, ok := goType.(gopkg.TypeNamed); ok {
-		declT, err := findDeclType(t, enumTypes)
-		if err != nil {
-			return "", err
-		}
-
-		d, err := randomDataForFieldType(declT.Type, enumTypes)
-		if err != nil {
-			return "", err
-		}
-
-		importElems := strings.Split(t.Import, "/")
-
-		enumTypeStr, err := t.FullType(
-			map[string]string{
-				t.Import: importElems[len(importElems)-1],
-			},
-		)
-		if err != nil {
-			return "", err
-		}
-
-		return enumTypeStr + "(" + d + ")", nil
-	}
-
-	typeStr, err := goType.FullType(
-		map[string]string{
-			"time": "time",
-		},
-	)
-	if err != nil {
-		return "", err
-	}
-
-	switch typeStr {
-	case "[]byte":
-		return `[]byte("some_bytes" + fmt.Sprint(nonce))`, nil
-	case "bool":
-		return `nonce%2==0`, nil
-	case "float32":
-		return `float32(nonce)`, nil
-	case "float64":
-		return `float64(nonce)`, nil
-	case "int32":
-		return `int32(nonce)`, nil
-	case "int64":
-		return `nonce`, nil
-	case "string":
-		return `"some_str" + fmt.Sprint(nonce)`, nil
-	case "time.Time":
-		return `time.Unix(nonce, 0)`, nil
-	default:
-		return "", errors.New("cannot generate DB tests for go type " + typeStr)
-	}
-}

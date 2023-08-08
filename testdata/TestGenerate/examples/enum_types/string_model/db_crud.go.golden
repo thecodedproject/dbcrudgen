@@ -1,0 +1,293 @@
+package string_model
+
+import (
+	context "context"
+	sql "database/sql"
+	errors "errors"
+	fmt "fmt"
+	enum_types "github.com/thecodedproject/dbcrudgen/examples/enum_types"
+)
+
+func Insert(
+	ctx context.Context,
+	db *sql.DB,
+	d enum_types.StringModel,
+) (int64, error) {
+
+	r, err := db.ExecContext(
+		ctx,
+		"insert into string_model set enum=?",
+		d.Enum,
+	)
+	if err != nil {
+		return 0, err
+	}
+
+	id, err := r.LastInsertId()
+	if err != nil {
+		return 0, err
+	}
+
+	return id, nil
+}
+
+func SelectByID(
+	ctx context.Context,
+	db *sql.DB,
+	id int64,
+) (enum_types.StringModel, error) {
+
+	r, err := Select(
+		ctx,
+		db,
+		map[string]any{
+			"id": id,
+		},
+	)
+	if err != nil {
+		return enum_types.StringModel{}, nil
+	}
+
+	if len(r) == 0 {
+		return enum_types.StringModel{}, errors.New("SelectByID: id not found - " + fmt.Sprint(id))
+	}
+
+	if len(r) > 1 {
+		return enum_types.StringModel{}, errors.New("found more than one entry with id")
+	}
+
+	return r[0], nil
+}
+
+func Select(
+	ctx context.Context,
+	db *sql.DB,
+	queryParams map[string]any,
+) ([]enum_types.StringModel, error) {
+
+
+	q := "select id, enum from string_model"
+
+	if len(queryParams) > 0 {
+		q += " where "
+	}
+
+	queryVals := make([]any, 0, len(queryParams))
+	i := 0
+	for k, v := range queryParams {
+		if !modelContainsField(k) {
+			return nil, errors.New("Select: no such field to query - " + k)
+		}
+
+		q += k + "=?"
+		i++
+		if i < len(queryParams) {
+			q += " and "
+		}
+		queryVals = append(queryVals, v)
+	}
+
+	r, err := db.QueryContext(
+		ctx,
+		q,
+		queryVals...,
+	)
+	if err != nil {
+		return nil, nil
+	}
+
+	// TODO: make this a configurable param
+	maxResponses := 1000
+	res := make([]enum_types.StringModel, 0, maxResponses)
+	for r.Next() {
+
+		if len(res) >= maxResponses {
+			return nil, errors.New("select query exceeded max responses")
+		}
+
+		var d enum_types.StringModel
+		r.Scan(
+			&d.ID,
+			&d.Enum,
+		)
+		if err != nil {
+			return nil, nil
+		}
+
+		res = append(res, d)
+	}
+
+	return res, nil
+}
+
+func Update(
+	ctx context.Context,
+	db *sql.DB,
+	updates map[string]any,
+	queryParams map[string]any,
+) (int64, error) {
+
+	if len(updates) == 0 {
+		return 0, nil
+	}
+
+	query := "update string_model set "
+	queryArgs := make([]any, 0, len(updates) + len(queryParams))
+	i := 0
+	for k, v := range updates {
+		if !modelContainsField(k) {
+			return 0, errors.New("Update: no such field to update - " + k)
+		}
+
+		query += k + "=?"
+		i++
+		if i < len(updates) {
+			query += ", "
+		}
+
+		queryArgs = append(queryArgs, v)
+	}
+
+	if len(queryParams) > 0 {
+		query += " where "
+	}
+	i = 0
+	for k, v := range queryParams {
+		if !modelContainsField(k) {
+			return 0, errors.New("Update: no such field to query - " + k)
+		}
+
+		query += k + "=?"
+		i++
+		if i < len(queryParams) {
+			query += " and "
+		}
+
+		queryArgs = append(queryArgs, v)
+	}
+
+	r, err := db.ExecContext(
+		ctx,
+		query,
+		queryArgs...,
+	)
+	if err != nil {
+		return 0, err
+	}
+
+	count, err := r.RowsAffected()
+	if err != nil {
+		return 0, err
+	}
+
+	return count, nil
+}
+
+func UpdateByID(
+	ctx context.Context,
+	db *sql.DB,
+	id int64,
+	updates map[string]any,
+) error {
+
+	if len(updates) == 0 {
+		return nil
+	}
+
+	n, err := Update(
+		ctx,
+		db,
+		updates,
+		map[string]any{
+			"id": id,
+		},
+	)
+	if err != nil {
+		return err
+	}
+
+	if n == 0 {
+		return errors.New("UpdateByID: no such ID")
+	}
+
+	return nil
+}
+
+func Delete(
+	ctx context.Context,
+	db *sql.DB,
+	queryParams map[string]any,
+) (int64, error) {
+
+	query := "delete from string_model"
+
+	if len(queryParams) > 0 {
+		query += " where "
+	}
+	i := 0
+	queryArgs := make([]any, 0, len(queryParams))
+	for k, v := range queryParams {
+		if !modelContainsField(k) {
+			return 0, errors.New("Delete: no such field to query - " + k)
+		}
+
+		query += k + "=?"
+		i++
+		if i < len(queryParams) {
+			query += " and "
+		}
+
+		queryArgs = append(queryArgs, v)
+	}
+
+	r, err := db.ExecContext(
+		ctx,
+		query,
+		queryArgs...,
+	)
+	if err != nil {
+		return 0, err
+	}
+
+	count, err := r.RowsAffected()
+	if err != nil {
+		return 0, err
+	}
+
+	return count, nil
+}
+
+func DeleteByID(
+	ctx context.Context,
+	db *sql.DB,
+	id int64,
+) error {
+
+	n, err := Delete(
+		ctx,
+		db,
+		map[string]any{
+			"id": id,
+		},
+	)
+	if err != nil {
+		return err
+	}
+
+	if n == 0 {
+		return errors.New("DeleteByID: no such ID")
+	}
+
+	return nil
+}
+
+func modelContainsField(field string) bool {
+
+	modelFields := map[string]bool{
+		"id": true,
+		"enum": true,
+	}
+
+	return modelFields[field]
+}
+

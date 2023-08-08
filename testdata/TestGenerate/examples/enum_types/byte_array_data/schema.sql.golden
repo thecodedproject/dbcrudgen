@@ -1,0 +1,4 @@
+create table byte_array_data (
+  id bigint primary key auto_increment,
+  enum varchar(255)
+);

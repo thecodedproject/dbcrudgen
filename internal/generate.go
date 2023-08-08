@@ -18,6 +18,7 @@ type pkgDef struct {
 	OutputPath string
 	Import gopkg.ImportAndAlias
 	DBDataModels []gopkg.DeclType
+	PkgTypes []gopkg.DeclType
 }
 
 func Generate() error {
@@ -73,6 +74,7 @@ func createPkgDef() (pkgDef, error) {
 			Alias: pkgName,
 		},
 		DBDataModels: models,
+		PkgTypes: allPkgTypes(currentPkg),
 	}, nil
 }
 
@@ -101,3 +103,15 @@ func findDataModels(
 
 	return models, nil
 }
+
+func allPkgTypes(
+	p []gopkg.FileContents,
+) []gopkg.DeclType {
+
+	allTypes := make([]gopkg.DeclType, 0)
+	for _, f := range p {
+		allTypes = append(allTypes, f.Types...)
+	}
+	return allTypes
+}
+

@@ -6,6 +6,7 @@ github.com/go-sql-driver/mysql v1.7.0 h1:ueSltNNllEqE3qcWBTD0iQd3IpL/6U+mJxLkazJ
 github.com/go-sql-driver/mysql v1.7.0/go.mod h1:OXbVy3sEdcQ2Doequ6Z5BW6fXNQTmx+9S1MCJN5yJMI=
 github.com/iancoleman/strcase v0.2.0 h1:05I4QRnGpI0m37iZQRuskXh+w77mr6Z41lwQzuHLwW0=
 github.com/iancoleman/strcase v0.2.0/go.mod h1:iwCmte+B7n89clKwxIoIXy/HfoL7AsD47ZCWhYzw7ho=
+github.com/pkg/errors v0.8.1 h1:iURUrRGxPUNPdy5/HRSm+Yj6okJ6UtLINN0Q9M4+h3I=
 github.com/pkg/errors v0.8.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
@@ -26,10 +27,14 @@ github.com/thecodedproject/gopkg v0.0.0-20230704103307-c0df71ee7bd8 h1:HrwJYANaq
 github.com/thecodedproject/gopkg v0.0.0-20230704103307-c0df71ee7bd8/go.mod h1:/sxB16ElXIkPlI0614rTReD/ZsM+xQcypL4SEzh/h7E=
 github.com/thecodedproject/gopkg v0.0.0-20230704104558-326d817863ce h1:Ih3F++n2hJEZT19M4Hxcm6Wv6divMOhO3r0x4NkD4Z0=
 github.com/thecodedproject/gopkg v0.0.0-20230704104558-326d817863ce/go.mod h1:/sxB16ElXIkPlI0614rTReD/ZsM+xQcypL4SEzh/h7E=
+github.com/thecodedproject/gopkg v0.0.0-20230715211531-7153ef1b2e7c h1:xvVbwEtzMoV04MYn+oLHxGIDkdHoSpuW3+KA/giop6Y=
+github.com/thecodedproject/gopkg v0.0.0-20230715211531-7153ef1b2e7c/go.mod h1:/sxB16ElXIkPlI0614rTReD/ZsM+xQcypL4SEzh/h7E=
 github.com/thecodedproject/gosql v0.0.0-20230522204317-e7c33e808459 h1:GJi6d627sIt4dJI2aeFC00QBjnTO6SCx0J4vaaWtz3c=
 github.com/thecodedproject/gosql v0.0.0-20230522204317-e7c33e808459/go.mod h1:bmInjNmhVb1Y5XsFNvP+g2vTSl7pl5I+11lOJ4L/oYY=
 github.com/thecodedproject/gosql v0.0.0-20230524114841-f9fc23a20a34 h1:JQ/YH+HlZD1hO7Oc6xlcrNmDqRKUes/NiO9IlsG0JyE=
 github.com/thecodedproject/gosql v0.0.0-20230524114841-f9fc23a20a34/go.mod h1:bmInjNmhVb1Y5XsFNvP+g2vTSl7pl5I+11lOJ4L/oYY=
+github.com/thecodedproject/gosql v0.0.0-20230726142416-138cfd616dff h1:9oizyxayXz/NJTN5FDVkW/Xpo3eWuMYm0kU6y6VD4BE=
+github.com/thecodedproject/gosql v0.0.0-20230726142416-138cfd616dff/go.mod h1:SDFSHQJSK4pNQOgzpdX8u8z5U0GiqRhOv8oCzgBIpOM=
 github.com/thecodedproject/gotest v0.0.0-20210324180211-85cdc3633940 h1:qiXgOBPlBO8iMiHZqGAg5mGxjjM2IKohYhkVYDaMtws=
 github.com/thecodedproject/gotest v0.0.0-20210324180211-85cdc3633940/go.mod h1:IiHuzi1MXVhg0iP+iA/cYr5DmGaTC3UxPXFYx6vBD6M=
 github.com/thecodedproject/gotest v0.0.0-20230628140541-20f25ee2673a h1:4lp+y+/jRDUmvbSCUETm8Fq7h/iIZpeu6DtrOBLpN7A=
@@ -42,6 +47,8 @@ github.com/thecodedproject/sqltest v0.0.0-20230516180504-ccb0a95d2337 h1:YlzIPZZ
 github.com/thecodedproject/sqltest v0.0.0-20230516180504-ccb0a95d2337/go.mod h1:4SZX+/YgdZ5G8yxmC1abXRcGDDNi1Dp1sfJpt1wQGsA=
 github.com/thecodedproject/sqltest v0.0.0-20230621170455-0e03e7581fda h1:w6fYZd//qmEfazmre6kzDIOETZT8zyT1KGd0nfsgj/4=
 github.com/thecodedproject/sqltest v0.0.0-20230621170455-0e03e7581fda/go.mod h1:4SZX+/YgdZ5G8yxmC1abXRcGDDNi1Dp1sfJpt1wQGsA=
+github.com/thecodedproject/sqltest v0.0.0-20230808195109-2bfee2b61c18 h1:YCnNy0eNaALrHt18v4QyWG0YG0LOOeRazlTNRPeKUw4=
+github.com/thecodedproject/sqltest v0.0.0-20230808195109-2bfee2b61c18/go.mod h1:4SZX+/YgdZ5G8yxmC1abXRcGDDNi1Dp1sfJpt1wQGsA=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
 gopkg.in/yaml.v2 v2.2.2/go.mod h1:hI93XBmqTisBFMUTm0b8Fm+jr3Dg1NNxqwp+5A1VGuI=
 gopkg.in/yaml.v3 v3.0.1 h1:fxVm/GzAzEWqLHuvctI91KS9hhNmmWOoWu0XTYJS7CA=

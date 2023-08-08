@@ -1,3 +1,3 @@
-package without_timestamps
+package enum_types
 
 //go:generate go run ../../main.go

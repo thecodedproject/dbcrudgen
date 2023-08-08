@@ -1,0 +1,3 @@
+examples/specify_types/an_entity/db_crud.go
+examples/specify_types/an_entity/db_crud_test.go
+examples/specify_types/an_entity/schema.sql

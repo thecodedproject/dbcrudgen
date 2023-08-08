@@ -1,0 +1,4 @@
+create table string_model (
+  id bigint primary key auto_increment,
+  enum varchar(255)
+);

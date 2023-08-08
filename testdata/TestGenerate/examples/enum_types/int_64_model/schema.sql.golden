@@ -1,0 +1,4 @@
+create table int_64_model (
+  id bigint primary key auto_increment,
+  enum bigint
+);

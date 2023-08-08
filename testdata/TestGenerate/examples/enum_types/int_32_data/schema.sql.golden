@@ -1,0 +1,4 @@
+create table int_32_data (
+  id bigint primary key auto_increment,
+  enum int
+);
