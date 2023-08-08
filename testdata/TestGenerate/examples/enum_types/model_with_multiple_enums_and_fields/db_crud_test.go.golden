@@ -1,11 +1,11 @@
-package int_64_model_test
+package model_with_multiple_enums_and_fields_test
 
 import (
 	context "context"
 	fmt "fmt"
 	require "github.com/stretchr/testify/require"
 	enum_types "github.com/thecodedproject/dbcrudgen/examples/enum_types"
-	int_64_model "github.com/thecodedproject/dbcrudgen/examples/enum_types/int_64_model"
+	model_with_multiple_enums_and_fields "github.com/thecodedproject/dbcrudgen/examples/enum_types/model_with_multiple_enums_and_fields"
 	assert "github.com/thecodedproject/gotest/assert"
 	gotest_time "github.com/thecodedproject/gotest/time"
 	sqltest "github.com/thecodedproject/sqltest"
@@ -13,10 +13,18 @@ import (
 	time "time"
 )
 
-func populateDataModelFromNonce(nonce int64) enum_types.Int64Model {
+func populateDataModelFromNonce(nonce int64) enum_types.ModelWithMultipleEnumsAndFields {
 
-	return enum_types.Int64Model{
-		Enum: enum_types.Int64Enum(nonce),
+	return enum_types.ModelWithMultipleEnumsAndFields{
+		A: nonce%2==0,
+		B: float32(nonce),
+		BEnum: enum_types.ByteArrayEnum([]byte("some_bytes" + fmt.Sprint(nonce))),
+		C: nonce,
+		D: "some_str" + fmt.Sprint(nonce),
+		E: time.Unix(nonce, 0),
+		I32Enum: enum_types.Int32Enum(int32(nonce)),
+		I64Enum: enum_types.Int64Enum(nonce),
+		SEnum: enum_types.StringEnum("some_str" + fmt.Sprint(nonce)),
 	}
 }
 
@@ -24,7 +32,7 @@ func populateDataModelFromNonceWithIDAndTimestamp(
 	nonce int64,
 	id int64,
 	t time.Time,
-) enum_types.Int64Model {
+) enum_types.ModelWithMultipleEnumsAndFields {
 
 	d := populateDataModelFromNonce(nonce)
 	d.ID = id
@@ -34,7 +42,15 @@ func populateDataModelFromNonceWithIDAndTimestamp(
 func queryFromNonce(nonce int64) map[string]any {
 
 	return map[string]any{
-		"enum": enum_types.Int64Enum(nonce),
+		"a": nonce%2==0,
+		"b": float32(nonce),
+		"b_enum": enum_types.ByteArrayEnum([]byte("some_bytes" + fmt.Sprint(nonce))),
+		"c": nonce,
+		"d": "some_str" + fmt.Sprint(nonce),
+		"e": time.Unix(nonce, 0),
+		"i_32_enum": enum_types.Int32Enum(int32(nonce)),
+		"i_64_enum": enum_types.Int64Enum(nonce),
+		"s_enum": enum_types.StringEnum("some_str" + fmt.Sprint(nonce)),
 	}
 }
 
@@ -44,9 +60,9 @@ func TestInsertAndSelect(t *testing.T) {
 
 	testCases := []struct{
 		Name string
-		ToInsert []enum_types.Int64Model
+		ToInsert []enum_types.ModelWithMultipleEnumsAndFields
 		Query map[string]any
-		Expected []enum_types.Int64Model
+		Expected []enum_types.ModelWithMultipleEnumsAndFields
 		ExpectErr bool
 	}{
 		{
@@ -54,22 +70,22 @@ func TestInsertAndSelect(t *testing.T) {
 		},
 		{
 			Name: "insert one and select",
-			ToInsert: []enum_types.Int64Model{
+			ToInsert: []enum_types.ModelWithMultipleEnumsAndFields{
 				populateDataModelFromNonce(11),
 			},
-			Expected: []enum_types.Int64Model{
+			Expected: []enum_types.ModelWithMultipleEnumsAndFields{
 				populateDataModelFromNonceWithIDAndTimestamp(11, 1, now),
 			},
 		},
 		{
 			Name: "insert many and select",
-			ToInsert: []enum_types.Int64Model{
+			ToInsert: []enum_types.ModelWithMultipleEnumsAndFields{
 				populateDataModelFromNonce(11),
 				populateDataModelFromNonce(21),
 				populateDataModelFromNonce(31),
 				populateDataModelFromNonce(41),
 			},
-			Expected: []enum_types.Int64Model{
+			Expected: []enum_types.ModelWithMultipleEnumsAndFields{
 				populateDataModelFromNonceWithIDAndTimestamp(11, 1, now),
 				populateDataModelFromNonceWithIDAndTimestamp(21, 2, now),
 				populateDataModelFromNonceWithIDAndTimestamp(31, 3, now),
@@ -78,7 +94,7 @@ func TestInsertAndSelect(t *testing.T) {
 		},
 		{
 			Name: "insert many and select with query",
-			ToInsert: []enum_types.Int64Model{
+			ToInsert: []enum_types.ModelWithMultipleEnumsAndFields{
 				populateDataModelFromNonce(22),
 				populateDataModelFromNonce(45),
 				populateDataModelFromNonce(45),
@@ -86,7 +102,7 @@ func TestInsertAndSelect(t *testing.T) {
 				populateDataModelFromNonce(45),
 			},
 			Query: queryFromNonce(45),
-			Expected: []enum_types.Int64Model{
+			Expected: []enum_types.ModelWithMultipleEnumsAndFields{
 				populateDataModelFromNonceWithIDAndTimestamp(45, 2, now),
 				populateDataModelFromNonceWithIDAndTimestamp(45, 3, now),
 				populateDataModelFromNonceWithIDAndTimestamp(45, 5, now),
@@ -94,11 +110,11 @@ func TestInsertAndSelect(t *testing.T) {
 		},
 		{
 			Name: "select query field which is not in data model returns error",
-			ToInsert: []enum_types.Int64Model{
+			ToInsert: []enum_types.ModelWithMultipleEnumsAndFields{
 				populateDataModelFromNonce(1),
 			},
 			Query: map[string]any{
-				"some_field_not_in_Int64Model": 1,
+				"some_field_not_in_ModelWithMultipleEnumsAndFields": 1,
 			},
 			ExpectErr: true,
 		},
@@ -111,11 +127,11 @@ func TestInsertAndSelect(t *testing.T) {
 			db := sqltest.OpenMysql(t, "schema.sql")
 
 			for _, d := range test.ToInsert {
-				_, err := int_64_model.Insert(ctx, db, d)
+				_, err := model_with_multiple_enums_and_fields.Insert(ctx, db, d)
 				require.NoError(t, err)
 			}
 
-			actual, err := int_64_model.Select(ctx, db, test.Query)
+			actual, err := model_with_multiple_enums_and_fields.Select(ctx, db, test.Query)
 			if test.ExpectErr {
 				require.Error(t, err)
 				return
@@ -137,14 +153,14 @@ func TestSelectByID(t *testing.T) {
 
 	testCases := []struct{
 		Name string
-		ToInsert []enum_types.Int64Model
+		ToInsert []enum_types.ModelWithMultipleEnumsAndFields
 		ID int64
-		Expected enum_types.Int64Model
+		Expected enum_types.ModelWithMultipleEnumsAndFields
 		ExpectErr bool
 	}{
 		{
 			Name: "when ID not found returns error",
-			ToInsert: []enum_types.Int64Model{
+			ToInsert: []enum_types.ModelWithMultipleEnumsAndFields{
 				populateDataModelFromNonce(100),
 				populateDataModelFromNonce(200),
 			},
@@ -153,7 +169,7 @@ func TestSelectByID(t *testing.T) {
 		},
 		{
 			Name: "when ID is found returns row",
-			ToInsert: []enum_types.Int64Model{
+			ToInsert: []enum_types.ModelWithMultipleEnumsAndFields{
 				populateDataModelFromNonce(100),
 				populateDataModelFromNonce(200),
 				populateDataModelFromNonce(300),
@@ -170,11 +186,11 @@ func TestSelectByID(t *testing.T) {
 			db := sqltest.OpenMysql(t, "schema.sql")
 
 			for _, d := range test.ToInsert {
-				_, err := int_64_model.Insert(ctx, db, d)
+				_, err := model_with_multiple_enums_and_fields.Insert(ctx, db, d)
 				require.NoError(t, err)
 			}
 
-			actual, err := int_64_model.SelectByID(ctx, db, test.ID)
+			actual, err := model_with_multiple_enums_and_fields.SelectByID(ctx, db, test.ID)
 			if test.ExpectErr {
 				require.Error(t, err)
 				return
@@ -192,11 +208,11 @@ func TestUpdate(t *testing.T) {
 
 	testCases := []struct{
 		Name string
-		ToInsert []enum_types.Int64Model
+		ToInsert []enum_types.ModelWithMultipleEnumsAndFields
 		Updates map[string]any
 		Query map[string]any
 		ExpectedNumUpdates int64
-		Expected []enum_types.Int64Model
+		Expected []enum_types.ModelWithMultipleEnumsAndFields
 		ExpectErr bool
 	}{
 		{
@@ -205,7 +221,7 @@ func TestUpdate(t *testing.T) {
 		{
 			Name: "update unknown field throws error",
 			Updates: map[string]any{
-				"field_not_in_the_enum_types.Int64Model_type": "update",
+				"field_not_in_the_enum_types.ModelWithMultipleEnumsAndFields_type": "update",
 			},
 			ExpectErr: true,
 		},
@@ -213,13 +229,13 @@ func TestUpdate(t *testing.T) {
 			Name: "query unknown field throws error",
 			Updates: queryFromNonce(1),
 			Query: map[string]any{
-				"field_not_in_Int64Model": "update",
+				"field_not_in_ModelWithMultipleEnumsAndFields": "update",
 			},
 			ExpectErr: true,
 		},
 		{
 			Name: "update all records",
-			ToInsert: []enum_types.Int64Model{
+			ToInsert: []enum_types.ModelWithMultipleEnumsAndFields{
 				populateDataModelFromNonce(123),
 				populateDataModelFromNonce(124),
 				populateDataModelFromNonce(125),
@@ -227,7 +243,7 @@ func TestUpdate(t *testing.T) {
 			},
 			Updates: queryFromNonce(111),
 			ExpectedNumUpdates: 4,
-			Expected: []enum_types.Int64Model{
+			Expected: []enum_types.ModelWithMultipleEnumsAndFields{
 				populateDataModelFromNonceWithIDAndTimestamp(111, 1, now),
 				populateDataModelFromNonceWithIDAndTimestamp(111, 2, now),
 				populateDataModelFromNonceWithIDAndTimestamp(111, 3, now),
@@ -236,7 +252,7 @@ func TestUpdate(t *testing.T) {
 		},
 		{
 			Name: "update records with query",
-			ToInsert: []enum_types.Int64Model{
+			ToInsert: []enum_types.ModelWithMultipleEnumsAndFields{
 				populateDataModelFromNonce(123),
 				populateDataModelFromNonce(125),
 				populateDataModelFromNonce(124),
@@ -247,7 +263,7 @@ func TestUpdate(t *testing.T) {
 			Updates: queryFromNonce(999),
 			Query: queryFromNonce(125),
 			ExpectedNumUpdates: 3,
-			Expected: []enum_types.Int64Model{
+			Expected: []enum_types.ModelWithMultipleEnumsAndFields{
 				populateDataModelFromNonceWithIDAndTimestamp(123, 1, now),
 				populateDataModelFromNonceWithIDAndTimestamp(999, 2, now),
 				populateDataModelFromNonceWithIDAndTimestamp(124, 3, now),
@@ -265,7 +281,7 @@ func TestUpdate(t *testing.T) {
 			db := sqltest.OpenMysql(t, "schema.sql")
 
 			for _, d := range test.ToInsert {
-				_, err := int_64_model.Insert(
+				_, err := model_with_multiple_enums_and_fields.Insert(
 					ctx,
 					db,
 					d,
@@ -273,7 +289,7 @@ func TestUpdate(t *testing.T) {
 				require.NoError(t, err)
 			}
 
-			numUpdates, err := int_64_model.Update(
+			numUpdates, err := model_with_multiple_enums_and_fields.Update(
 				ctx,
 				db,
 				test.Updates,
@@ -287,7 +303,7 @@ func TestUpdate(t *testing.T) {
 
 			require.Equal(t, test.ExpectedNumUpdates, numUpdates)
 
-			actual, err := int_64_model.Select(ctx, db, nil)
+			actual, err := model_with_multiple_enums_and_fields.Select(ctx, db, nil)
 			require.NoError(t, err)
 
 			require.Equal(t, len(test.Expected), len(actual))
@@ -305,10 +321,10 @@ func TestUpdateByID(t *testing.T) {
 
 	testCases := []struct{
 		Name string
-		ToInsert []enum_types.Int64Model
+		ToInsert []enum_types.ModelWithMultipleEnumsAndFields
 		ID int64
 		Updates map[string]any
-		Expected []enum_types.Int64Model
+		Expected []enum_types.ModelWithMultipleEnumsAndFields
 		ExpectErr bool
 	}{
 		{
@@ -324,13 +340,13 @@ func TestUpdateByID(t *testing.T) {
 			Name: "when update field not in schema throws error",
 			ID: 1,
 			Updates: map[string]any{
-				"field_not_in_the_enum_types.Int64Model_type": "update",
+				"field_not_in_the_enum_types.ModelWithMultipleEnumsAndFields_type": "update",
 			},
 			ExpectErr: true,
 		},
 		{
 			Name: "insert many and update one by id",
-			ToInsert: []enum_types.Int64Model{
+			ToInsert: []enum_types.ModelWithMultipleEnumsAndFields{
 				populateDataModelFromNonce(101),
 				populateDataModelFromNonce(102),
 				populateDataModelFromNonce(103),
@@ -338,7 +354,7 @@ func TestUpdateByID(t *testing.T) {
 			},
 			ID: 3,
 			Updates: queryFromNonce(555),
-			Expected: []enum_types.Int64Model{
+			Expected: []enum_types.ModelWithMultipleEnumsAndFields{
 				populateDataModelFromNonceWithIDAndTimestamp(101, 1, now),
 				populateDataModelFromNonceWithIDAndTimestamp(102, 2, now),
 				populateDataModelFromNonceWithIDAndTimestamp(555, 3, now),
@@ -354,11 +370,11 @@ func TestUpdateByID(t *testing.T) {
 			db := sqltest.OpenMysql(t, "schema.sql")
 
 			for _, d := range test.ToInsert {
-				_, err := int_64_model.Insert(ctx, db, d)
+				_, err := model_with_multiple_enums_and_fields.Insert(ctx, db, d)
 				require.NoError(t, err)
 			}
 
-			err := int_64_model.UpdateByID(
+			err := model_with_multiple_enums_and_fields.UpdateByID(
 				ctx,
 				db,
 				test.ID,
@@ -371,7 +387,7 @@ func TestUpdateByID(t *testing.T) {
 			}
 			require.NoError(t, err)
 
-			actual, err := int_64_model.Select(ctx, db, nil)
+			actual, err := model_with_multiple_enums_and_fields.Select(ctx, db, nil)
 			require.NoError(t, err)
 
 			require.Equal(t, len(test.Expected), len(actual))
@@ -389,15 +405,15 @@ func TestDelete(t *testing.T) {
 
 	testCases := []struct{
 		Name string
-		ToInsert []enum_types.Int64Model
+		ToInsert []enum_types.ModelWithMultipleEnumsAndFields
 		Query map[string]any
 		ExpectedNumDeleted int64
-		Expected []enum_types.Int64Model
+		Expected []enum_types.ModelWithMultipleEnumsAndFields
 		ExpectErr bool
 	}{
 		{
 			Name: "empty query deletes all records",
-			ToInsert: []enum_types.Int64Model{
+			ToInsert: []enum_types.ModelWithMultipleEnumsAndFields{
 				populateDataModelFromNonce(1000),
 				populateDataModelFromNonce(1001),
 				populateDataModelFromNonce(1002),
@@ -408,7 +424,7 @@ func TestDelete(t *testing.T) {
 		},
 		{
 			Name: "delete records using query",
-			ToInsert: []enum_types.Int64Model{
+			ToInsert: []enum_types.ModelWithMultipleEnumsAndFields{
 				populateDataModelFromNonce(1000),
 				populateDataModelFromNonce(1001),
 				populateDataModelFromNonce(1002),
@@ -419,7 +435,7 @@ func TestDelete(t *testing.T) {
 			},
 			Query: queryFromNonce(1002),
 			ExpectedNumDeleted: 3,
-			Expected: []enum_types.Int64Model{
+			Expected: []enum_types.ModelWithMultipleEnumsAndFields{
 				populateDataModelFromNonceWithIDAndTimestamp(1000, 1, now),
 				populateDataModelFromNonceWithIDAndTimestamp(1001, 2, now),
 				populateDataModelFromNonceWithIDAndTimestamp(1003, 5, now),
@@ -429,7 +445,7 @@ func TestDelete(t *testing.T) {
 		{
 			Name: "when query contains field not in data model returns error",
 			Query: map[string]any{
-				"some_field_not_in_Int64Model": 1,
+				"some_field_not_in_ModelWithMultipleEnumsAndFields": 1,
 			},
 			ExpectErr: true,
 		},
@@ -442,11 +458,11 @@ func TestDelete(t *testing.T) {
 			db := sqltest.OpenMysql(t, "schema.sql")
 
 			for _, d := range test.ToInsert {
-				_, err := int_64_model.Insert(ctx, db, d)
+				_, err := model_with_multiple_enums_and_fields.Insert(ctx, db, d)
 				require.NoError(t, err)
 			}
 
-			numDeleted, err := int_64_model.Delete(ctx, db, test.Query)
+			numDeleted, err := model_with_multiple_enums_and_fields.Delete(ctx, db, test.Query)
 			if test.ExpectErr {
 				require.Error(t, err)
 				return
@@ -455,7 +471,7 @@ func TestDelete(t *testing.T) {
 
 			require.Equal(t, test.ExpectedNumDeleted, numDeleted)
 
-			actual, err := int_64_model.Select(ctx, db, nil)
+			actual, err := model_with_multiple_enums_and_fields.Select(ctx, db, nil)
 			require.NoError(t, err)
 
 			require.Equal(t, len(test.Expected), len(actual))
@@ -473,9 +489,9 @@ func TestDeleteByID(t *testing.T) {
 
 	testCases := []struct{
 		Name string
-		ToInsert []enum_types.Int64Model
+		ToInsert []enum_types.ModelWithMultipleEnumsAndFields
 		ID int64
-		Expected []enum_types.Int64Model
+		Expected []enum_types.ModelWithMultipleEnumsAndFields
 		ExpectErr bool
 	}{
 		{
@@ -484,14 +500,14 @@ func TestDeleteByID(t *testing.T) {
 		},
 		{
 			Name: "insert many and delete by ID",
-			ToInsert: []enum_types.Int64Model{
+			ToInsert: []enum_types.ModelWithMultipleEnumsAndFields{
 				populateDataModelFromNonce(101),
 				populateDataModelFromNonce(102),
 				populateDataModelFromNonce(103),
 				populateDataModelFromNonce(104),
 			},
 			ID: 3,
-			Expected: []enum_types.Int64Model{
+			Expected: []enum_types.ModelWithMultipleEnumsAndFields{
 				populateDataModelFromNonceWithIDAndTimestamp(101, 1, now),
 				populateDataModelFromNonceWithIDAndTimestamp(102, 2, now),
 				populateDataModelFromNonceWithIDAndTimestamp(104, 4, now),
@@ -506,11 +522,11 @@ func TestDeleteByID(t *testing.T) {
 			db := sqltest.OpenMysql(t, "schema.sql")
 
 			for _, d := range test.ToInsert {
-				_, err := int_64_model.Insert(ctx, db, d)
+				_, err := model_with_multiple_enums_and_fields.Insert(ctx, db, d)
 				require.NoError(t, err)
 			}
 
-			err := int_64_model.DeleteByID(
+			err := model_with_multiple_enums_and_fields.DeleteByID(
 				ctx,
 				db,
 				test.ID,
@@ -522,7 +538,7 @@ func TestDeleteByID(t *testing.T) {
 			}
 			require.NoError(t, err)
 
-			actual, err := int_64_model.Select(ctx, db, nil)
+			actual, err := model_with_multiple_enums_and_fields.Select(ctx, db, nil)
 			require.NoError(t, err)
 
 			require.Equal(t, len(test.Expected), len(actual))

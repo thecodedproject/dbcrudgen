@@ -1,0 +1,12 @@
+create table model_with_multiple_enums_and_fields (
+  id bigint primary key auto_increment,
+  b_enum varchar(255),
+  i_32_enum int,
+  i_64_enum bigint,
+  s_enum varchar(255),
+  a bit,
+  b float,
+  c bigint,
+  d varchar(255),
+  e datetime
+);

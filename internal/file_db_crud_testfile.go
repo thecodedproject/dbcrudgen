@@ -34,7 +34,6 @@ func fileDBCrudTest(d pkgDef) func() ([]gopkg.FileContents, error) {
 				"github.com/stretchr/testify/require",
 				"github.com/thecodedproject/sqltest",
 				"github.com/thecodedproject/gotest/assert",
-				"github.com/thecodedproject/gotest/time",
 			)
 			imports = append(imports,
 				gopkg.ImportAndAlias{
@@ -42,6 +41,10 @@ func fileDBCrudTest(d pkgDef) func() ([]gopkg.FileContents, error) {
 					Alias: dbcrudAlias,
 				},
 				d.Import,
+				gopkg.ImportAndAlias{
+					Import: "github.com/thecodedproject/gotest/time",
+					Alias: "gotest_time",
+				},
 			)
 
 			helpers, err := testHelperMethods(d, modelName, modelStruct)
@@ -85,7 +88,7 @@ func testfuncInsertAndSelect(
 			testingArg(),
 		},
 		BodyTmpl: `
-	now := time.SetTimeNowForTesting(t)
+	now := gotest_time.SetTimeNowForTesting(t)
 
 	testCases := []struct{
 		Name string
@@ -193,7 +196,7 @@ func testfuncSelectByID(
 			testingArg(),
 		},
 		BodyTmpl: `
-	now := time.SetTimeNowForTesting(t)
+	now := gotest_time.SetTimeNowForTesting(t)
 
 	testCases := []struct{
 		Name string
@@ -264,7 +267,7 @@ func testfuncUpdate(
 		},
 		//BodyData: scanArgs,
 		BodyTmpl: `
-	now := time.SetTimeNowForTesting(t)
+	now := gotest_time.SetTimeNowForTesting(t)
 
 	testCases := []struct{
 		Name string
@@ -392,7 +395,7 @@ func testfuncUpdateByID(
 			testingArg(),
 		},
 		BodyTmpl: `
-	now := time.SetTimeNowForTesting(t)
+	now := gotest_time.SetTimeNowForTesting(t)
 
 	testCases := []struct{
 		Name string
@@ -491,7 +494,7 @@ func testfuncDelete(
 			testingArg(),
 		},
 		BodyTmpl: `
-	now := time.SetTimeNowForTesting(t)
+	now := gotest_time.SetTimeNowForTesting(t)
 
 	testCases := []struct{
 		Name string
@@ -590,7 +593,7 @@ func testfuncDeleteByID(
 			testingArg(),
 		},
 		BodyTmpl: `
-	now := time.SetTimeNowForTesting(t)
+	now := gotest_time.SetTimeNowForTesting(t)
 
 	testCases := []struct{
 		Name string
@@ -743,7 +746,7 @@ func testHelperMethods(
 	d := populateDataModelFromNonce(nonce)
 	d.ID = id
 {{- range .BodyData}}
-	d.{{.}} = t.Round(time.Second)
+	d.{{.}} = t.Round(gotest_time.Second)
 {{- end}}
 	return d
 `,
@@ -791,31 +794,6 @@ func randomDataForFieldType(
 	enumTypes []gopkg.DeclType,
 ) (string, error) {
 
-	if t, ok := goType.(gopkg.TypeNamed); ok {
-		declT, err := findDeclType(t, enumTypes)
-		if err != nil {
-			return "", err
-		}
-
-		d, err := randomDataForFieldType(declT.Type, enumTypes)
-		if err != nil {
-			return "", err
-		}
-
-		importElems := strings.Split(t.Import, "/")
-
-		enumTypeStr, err := t.FullType(
-			map[string]string{
-				t.Import: importElems[len(importElems)-1],
-			},
-		)
-		if err != nil {
-			return "", err
-		}
-
-		return enumTypeStr + "(" + d + ")", nil
-	}
-
 	typeStr, err := goType.FullType(
 		map[string]string{
 			"time": "time",
@@ -842,7 +820,32 @@ func randomDataForFieldType(
 		return `"some_str" + fmt.Sprint(nonce)`, nil
 	case "time.Time":
 		return `time.Unix(nonce, 0)`, nil
-	default:
-		return "", errors.New("cannot generate DB tests for go type " + typeStr)
 	}
+
+	if t, ok := goType.(gopkg.TypeNamed); ok {
+		declT, err := findDeclType(t, enumTypes)
+		if err != nil {
+			return "", err
+		}
+
+		d, err := randomDataForFieldType(declT.Type, enumTypes)
+		if err != nil {
+			return "", err
+		}
+
+		importElems := strings.Split(t.Import, "/")
+
+		enumTypeStr, err := t.FullType(
+			map[string]string{
+				t.Import: importElems[len(importElems)-1],
+			},
+		)
+		if err != nil {
+			return "", err
+		}
+
+		return enumTypeStr + "(" + d + ")", nil
+	}
+
+	return "", errors.New("cannot generate DB tests for go type " + typeStr)
 }

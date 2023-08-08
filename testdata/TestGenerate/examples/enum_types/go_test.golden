@@ -222,4 +222,60 @@ ok  	github.com/thecodedproject/dbcrudgen/examples/enum_types/int_64_model	X.XXX
     --- PASS: TestDeleteByID/when_ID_not_found_returns_error (X.XXs)
     --- PASS: TestDeleteByID/insert_many_and_delete_by_ID (X.XXs)
 PASS
+ok  	github.com/thecodedproject/dbcrudgen/examples/enum_types/model_with_multiple_enums_and_fields	X.XXXs
+=== RUN   TestInsertAndSelect
+=== RUN   TestInsertAndSelect/selects_nothing_when_nothing_inserted
+=== RUN   TestInsertAndSelect/insert_one_and_select
+=== RUN   TestInsertAndSelect/insert_many_and_select
+=== RUN   TestInsertAndSelect/insert_many_and_select_with_query
+=== RUN   TestInsertAndSelect/select_query_field_which_is_not_in_data_model_returns_error
+--- PASS: TestInsertAndSelect (X.XXs)
+    --- PASS: TestInsertAndSelect/selects_nothing_when_nothing_inserted (X.XXs)
+    --- PASS: TestInsertAndSelect/insert_one_and_select (X.XXs)
+    --- PASS: TestInsertAndSelect/insert_many_and_select (X.XXs)
+    --- PASS: TestInsertAndSelect/insert_many_and_select_with_query (X.XXs)
+    --- PASS: TestInsertAndSelect/select_query_field_which_is_not_in_data_model_returns_error (X.XXs)
+=== RUN   TestSelectByID
+=== RUN   TestSelectByID/when_ID_not_found_returns_error
+=== RUN   TestSelectByID/when_ID_is_found_returns_row
+--- PASS: TestSelectByID (X.XXs)
+    --- PASS: TestSelectByID/when_ID_not_found_returns_error (X.XXs)
+    --- PASS: TestSelectByID/when_ID_is_found_returns_row (X.XXs)
+=== RUN   TestUpdate
+=== RUN   TestUpdate/empty_params_does_nothing
+=== RUN   TestUpdate/update_unknown_field_throws_error
+=== RUN   TestUpdate/query_unknown_field_throws_error
+=== RUN   TestUpdate/update_all_records
+=== RUN   TestUpdate/update_records_with_query
+--- PASS: TestUpdate (X.XXs)
+    --- PASS: TestUpdate/empty_params_does_nothing (X.XXs)
+    --- PASS: TestUpdate/update_unknown_field_throws_error (X.XXs)
+    --- PASS: TestUpdate/query_unknown_field_throws_error (X.XXs)
+    --- PASS: TestUpdate/update_all_records (X.XXs)
+    --- PASS: TestUpdate/update_records_with_query (X.XXs)
+=== RUN   TestUpdateByID
+=== RUN   TestUpdateByID/no_updates_does_not_error_-_even_if_ID_does_not_exist
+=== RUN   TestUpdateByID/when_there_are_updates_and_ID_not_found_throws_error
+=== RUN   TestUpdateByID/when_update_field_not_in_schema_throws_error
+=== RUN   TestUpdateByID/insert_many_and_update_one_by_id
+--- PASS: TestUpdateByID (X.XXs)
+    --- PASS: TestUpdateByID/no_updates_does_not_error_-_even_if_ID_does_not_exist (X.XXs)
+    --- PASS: TestUpdateByID/when_there_are_updates_and_ID_not_found_throws_error (X.XXs)
+    --- PASS: TestUpdateByID/when_update_field_not_in_schema_throws_error (X.XXs)
+    --- PASS: TestUpdateByID/insert_many_and_update_one_by_id (X.XXs)
+=== RUN   TestDelete
+=== RUN   TestDelete/empty_query_deletes_all_records
+=== RUN   TestDelete/delete_records_using_query
+=== RUN   TestDelete/when_query_contains_field_not_in_data_model_returns_error
+--- PASS: TestDelete (X.XXs)
+    --- PASS: TestDelete/empty_query_deletes_all_records (X.XXs)
+    --- PASS: TestDelete/delete_records_using_query (X.XXs)
+    --- PASS: TestDelete/when_query_contains_field_not_in_data_model_returns_error (X.XXs)
+=== RUN   TestDeleteByID
+=== RUN   TestDeleteByID/when_ID_not_found_returns_error
+=== RUN   TestDeleteByID/insert_many_and_delete_by_ID
+--- PASS: TestDeleteByID (X.XXs)
+    --- PASS: TestDeleteByID/when_ID_not_found_returns_error (X.XXs)
+    --- PASS: TestDeleteByID/insert_many_and_delete_by_ID (X.XXs)
+PASS
 ok  	github.com/thecodedproject/dbcrudgen/examples/enum_types/string_model	X.XXXs

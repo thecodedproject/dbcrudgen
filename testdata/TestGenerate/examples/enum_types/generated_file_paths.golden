@@ -7,6 +7,9 @@ examples/enum_types/int_32_data/schema.sql
 examples/enum_types/int_64_model/db_crud.go
 examples/enum_types/int_64_model/db_crud_test.go
 examples/enum_types/int_64_model/schema.sql
+examples/enum_types/model_with_multiple_enums_and_fields/db_crud.go
+examples/enum_types/model_with_multiple_enums_and_fields/db_crud_test.go
+examples/enum_types/model_with_multiple_enums_and_fields/schema.sql
 examples/enum_types/string_model/db_crud.go
 examples/enum_types/string_model/db_crud_test.go
 examples/enum_types/string_model/schema.sql

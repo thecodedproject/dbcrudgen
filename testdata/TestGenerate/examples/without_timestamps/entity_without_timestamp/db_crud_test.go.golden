@@ -7,10 +7,10 @@ import (
 	without_timestamps "github.com/thecodedproject/dbcrudgen/examples/without_timestamps"
 	entity_without_timestamp "github.com/thecodedproject/dbcrudgen/examples/without_timestamps/entity_without_timestamp"
 	assert "github.com/thecodedproject/gotest/assert"
-	time "github.com/thecodedproject/gotest/time"
+	gotest_time "github.com/thecodedproject/gotest/time"
 	sqltest "github.com/thecodedproject/sqltest"
 	testing "testing"
-	time2 "time"
+	time "time"
 )
 
 func populateDataModelFromNonce(nonce int64) without_timestamps.EntityWithoutTimestamp {
@@ -29,7 +29,7 @@ func populateDataModelFromNonce(nonce int64) without_timestamps.EntityWithoutTim
 func populateDataModelFromNonceWithIDAndTimestamp(
 	nonce int64,
 	id int64,
-	t time2.Time,
+	t time.Time,
 ) without_timestamps.EntityWithoutTimestamp {
 
 	d := populateDataModelFromNonce(nonce)
@@ -52,7 +52,7 @@ func queryFromNonce(nonce int64) map[string]any {
 
 func TestInsertAndSelect(t *testing.T) {
 
-	now := time.SetTimeNowForTesting(t)
+	now := gotest_time.SetTimeNowForTesting(t)
 
 	testCases := []struct{
 		Name string
@@ -145,7 +145,7 @@ func TestInsertAndSelect(t *testing.T) {
 
 func TestSelectByID(t *testing.T) {
 
-	now := time.SetTimeNowForTesting(t)
+	now := gotest_time.SetTimeNowForTesting(t)
 
 	testCases := []struct{
 		Name string
@@ -200,7 +200,7 @@ func TestSelectByID(t *testing.T) {
 
 func TestUpdate(t *testing.T) {
 
-	now := time.SetTimeNowForTesting(t)
+	now := gotest_time.SetTimeNowForTesting(t)
 
 	testCases := []struct{
 		Name string
@@ -313,7 +313,7 @@ func TestUpdate(t *testing.T) {
 
 func TestUpdateByID(t *testing.T) {
 
-	now := time.SetTimeNowForTesting(t)
+	now := gotest_time.SetTimeNowForTesting(t)
 
 	testCases := []struct{
 		Name string
@@ -397,7 +397,7 @@ func TestUpdateByID(t *testing.T) {
 
 func TestDelete(t *testing.T) {
 
-	now := time.SetTimeNowForTesting(t)
+	now := gotest_time.SetTimeNowForTesting(t)
 
 	testCases := []struct{
 		Name string
@@ -481,7 +481,7 @@ func TestDelete(t *testing.T) {
 
 func TestDeleteByID(t *testing.T) {
 
-	now := time.SetTimeNowForTesting(t)
+	now := gotest_time.SetTimeNowForTesting(t)
 
 	testCases := []struct{
 		Name string

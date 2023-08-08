@@ -1,6 +1,8 @@
 package enum_types
 
 import (
+	"time"
+
 	"github.com/thecodedproject/dbcrudgen/dbcrudgen"
 )
 
@@ -54,4 +56,19 @@ type StringModel struct {
 	dbcrudgen.DataModel
 	ID int64
 	Enum StringEnum
+}
+
+type ModelWithMultipleEnumsAndFields struct {
+	dbcrudgen.DataModel
+
+	ID int64
+	BEnum ByteArrayEnum
+	I32Enum Int32Enum
+	I64Enum Int64Enum
+	SEnum StringEnum
+	A bool
+	B float32
+	C int64
+	D string
+	E time.Time
 }
