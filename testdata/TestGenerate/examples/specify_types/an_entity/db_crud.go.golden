@@ -107,7 +107,7 @@ func Select(
 		}
 
 		var d specify_types.AnEntity
-		r.Scan(
+		err := r.Scan(
 			&d.ID,
 			&d.AStr,
 			&d.BStr,

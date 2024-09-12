@@ -112,7 +112,7 @@ func Select(
 		}
 
 		var d without_timestamps.EntityWithoutTimestamp
-		r.Scan(
+		err := r.Scan(
 			&d.ID,
 			&d.AStr,
 			&d.BStr,

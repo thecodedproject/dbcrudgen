@@ -324,7 +324,7 @@ func selectMethod(
 		}
 
 		var d ` + dbModelType + `
-		r.Scan(
+		err := r.Scan(
 {{- range .BodyData}}
 			{{.}},
 {{- end}}

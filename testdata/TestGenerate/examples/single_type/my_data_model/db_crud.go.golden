@@ -111,7 +111,7 @@ func Select(
 		}
 
 		var d single_type.MyDataModel
-		r.Scan(
+		err := r.Scan(
 			&d.ID,
 			&d.InsertedAt,
 			&d.UpdatedAt,

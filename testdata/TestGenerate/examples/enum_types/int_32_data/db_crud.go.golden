@@ -106,7 +106,7 @@ func Select(
 		}
 
 		var d enum_types.Int32Data
-		r.Scan(
+		err := r.Scan(
 			&d.ID,
 			&d.Enum,
 		)

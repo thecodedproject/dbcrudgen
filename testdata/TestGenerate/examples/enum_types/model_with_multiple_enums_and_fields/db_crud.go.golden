@@ -114,7 +114,7 @@ func Select(
 		}
 
 		var d enum_types.ModelWithMultipleEnumsAndFields
-		r.Scan(
+		err := r.Scan(
 			&d.ID,
 			&d.BEnum,
 			&d.I32Enum,
