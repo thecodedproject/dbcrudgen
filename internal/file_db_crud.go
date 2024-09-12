@@ -204,7 +204,7 @@ func selectByIDMethod(
 		},
 	)
 	if err != nil {
-		return ` + dbModelType + `{}, nil
+		return ` + dbModelType + `{}, err
 	}
 
 	if len(r) == 0 {
@@ -311,7 +311,7 @@ func selectMethod(
 		queryVals...,
 	)
 	if err != nil {
-		return nil, nil
+		return nil, err
 	}
 
 	// TODO: make this a configurable param
@@ -330,7 +330,7 @@ func selectMethod(
 {{- end}}
 		)
 		if err != nil {
-			return nil, nil
+			return nil, err
 		}
 
 		res = append(res, d)

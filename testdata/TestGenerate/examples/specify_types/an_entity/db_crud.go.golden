@@ -46,7 +46,7 @@ func SelectByID(
 		},
 	)
 	if err != nil {
-		return specify_types.AnEntity{}, nil
+		return specify_types.AnEntity{}, err
 	}
 
 	if len(r) == 0 {
@@ -94,7 +94,7 @@ func Select(
 		queryVals...,
 	)
 	if err != nil {
-		return nil, nil
+		return nil, err
 	}
 
 	// TODO: make this a configurable param
@@ -113,7 +113,7 @@ func Select(
 			&d.BStr,
 		)
 		if err != nil {
-			return nil, nil
+			return nil, err
 		}
 
 		res = append(res, d)

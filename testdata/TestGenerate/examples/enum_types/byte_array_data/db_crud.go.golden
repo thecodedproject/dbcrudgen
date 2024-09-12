@@ -45,7 +45,7 @@ func SelectByID(
 		},
 	)
 	if err != nil {
-		return enum_types.ByteArrayData{}, nil
+		return enum_types.ByteArrayData{}, err
 	}
 
 	if len(r) == 0 {
@@ -93,7 +93,7 @@ func Select(
 		queryVals...,
 	)
 	if err != nil {
-		return nil, nil
+		return nil, err
 	}
 
 	// TODO: make this a configurable param
@@ -111,7 +111,7 @@ func Select(
 			&d.Enum,
 		)
 		if err != nil {
-			return nil, nil
+			return nil, err
 		}
 
 		res = append(res, d)
