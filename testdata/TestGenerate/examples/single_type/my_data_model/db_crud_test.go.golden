@@ -112,7 +112,6 @@ func TestInsertAndSelect(t *testing.T) {
 
 	for _, test := range testCases {
 		t.Run(test.Name, func(t *testing.T) {
-
 			ctx := context.Background()
 			db := sqltest.OpenMysql(t, "schema.sql")
 
@@ -171,7 +170,6 @@ func TestSelectByID(t *testing.T) {
 
 	for _, test := range testCases {
 		t.Run(test.Name, func(t *testing.T) {
-
 			ctx := context.Background()
 			db := sqltest.OpenMysql(t, "schema.sql")
 
@@ -266,16 +264,11 @@ func TestUpdate(t *testing.T) {
 
 	for _, test := range testCases {
 		t.Run(test.Name, func(t *testing.T) {
-
 			ctx := context.Background()
 			db := sqltest.OpenMysql(t, "schema.sql")
 
 			for _, d := range test.ToInsert {
-				_, err := my_data_model.Insert(
-					ctx,
-					db,
-					d,
-				)
+				_, err := my_data_model.Insert(ctx, db, d)
 				require.NoError(t, err)
 			}
 
@@ -355,7 +348,6 @@ func TestUpdateByID(t *testing.T) {
 
 	for _, test := range testCases {
 		t.Run(test.Name, func(t *testing.T) {
-
 			ctx := context.Background()
 			db := sqltest.OpenMysql(t, "schema.sql")
 
@@ -443,7 +435,6 @@ func TestDelete(t *testing.T) {
 
 	for _, test := range testCases {
 		t.Run(test.Name, func(t *testing.T) {
-
 			ctx := context.Background()
 			db := sqltest.OpenMysql(t, "schema.sql")
 
@@ -507,7 +498,6 @@ func TestDeleteByID(t *testing.T) {
 
 	for _, test := range testCases {
 		t.Run(test.Name, func(t *testing.T) {
-
 			ctx := context.Background()
 			db := sqltest.OpenMysql(t, "schema.sql")
 

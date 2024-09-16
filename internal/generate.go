@@ -12,6 +12,8 @@ var (
 	outputPath = flag.String("outdir,o", ".", "output directory for generated files")
 	// TODO add flags for making methods public
 	//publicInsert = flag.Bool("public_insert", "
+
+	useDBContext = flag.Bool("db_context", false, "use DB context in generated methods")
 )
 
 type pkgDef struct {
@@ -19,6 +21,7 @@ type pkgDef struct {
 	Import gopkg.ImportAndAlias
 	DBDataModels []gopkg.DeclType
 	PkgTypes []gopkg.DeclType
+	UseDBContext bool
 }
 
 func Generate() error {
@@ -75,6 +78,7 @@ func createPkgDef() (pkgDef, error) {
 		},
 		DBDataModels: models,
 		PkgTypes: allPkgTypes(currentPkg),
+		UseDBContext: *useDBContext,
 	}, nil
 }
 

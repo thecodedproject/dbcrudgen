@@ -1,0 +1,3 @@
+examples/with_db_context/my_data_model/db_crud.go
+examples/with_db_context/my_data_model/db_crud_test.go
+examples/with_db_context/my_data_model/schema.sql

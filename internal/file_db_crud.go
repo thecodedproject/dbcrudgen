@@ -25,6 +25,12 @@ func fileDBCrud(d pkgDef) func() ([]gopkg.FileContents, error) {
 				"fmt",
 			)
 
+			if d.UseDBContext {
+				imports = append(imports, tmpl.UnnamedImports(
+					"github.com/thecodedproject/dbcrudgen/lib",
+				)...)
+			}
+
 			modelName := model.Name
 			modelStruct, ok := model.Type.(gopkg.TypeStruct)
 			if !ok {
@@ -93,20 +99,28 @@ func insertMethod(
 		}
 	}
 
+	dbContextExtraction := ""
+	if d.UseDBContext {
+		dbContextExtraction = `
+	db, err := lib.DBFromContext(ctx)
+	if err != nil {
+		{{FuncReturnDefaultsWithErr}}
+	}
+`
+	}
 
 	return gopkg.DeclFunc{
 		Name: "Insert",
-		Args: []gopkg.DeclVar{
-			ctxArg(),
-			dbArg(),
-			{
+		Args: dbMethodArgs(
+			d.UseDBContext,
+			gopkg.DeclVar{
 				Name: "d",
 				Type: gopkg.TypeNamed{
 					Name: modelName,
 					Import: d.Import.Import,
 				},
 			},
-		},
+		),
 		ReturnArgs: tmpl.UnnamedReturnArgs(
 			gopkg.TypeInt64{},
 			gopkg.TypeError{},
@@ -116,7 +130,7 @@ func insertMethod(
 		}{
 			DBInsertArgs: queryArgs,
 		},
-		BodyTmpl: `
+		BodyTmpl: dbContextExtraction + `
 	r, err := db.ExecContext(
 		ctx,
 		"` + query + `",
@@ -651,3 +665,26 @@ func dbArg() gopkg.DeclVar {
 	}
 }
 
+// dbMethodArgs returns the arguments (input parameters) used for DB crud method
+//
+// The arguments will always be (in this order):
+// - `context.Context`
+// - `*sql.DB`, if `useDBContext == false`
+// - all the additional parameters passed in the `args` var.
+//
+// This is a convenience method to make it easier to build the args with the optional
+// `sql.DB` depending on whether the DB context is being used.
+func dbMethodArgs(
+	useDBContext bool,
+	args ...gopkg.DeclVar,
+) []gopkg.DeclVar {
+	retArgs := []gopkg.DeclVar{
+		ctxArg(),
+	}
+
+	if !useDBContext {
+		retArgs = append(retArgs, dbArg())
+	}
+
+	return append(retArgs, args...)
+}

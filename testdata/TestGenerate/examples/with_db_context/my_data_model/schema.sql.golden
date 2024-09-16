@@ -1,0 +1,8 @@
+create table my_data_model (
+  id bigint primary key auto_increment,
+  inserted_at datetime,
+  updated_at datetime,
+  some_string varchar(255),
+  some_int bigint,
+  some_bool bit
+);

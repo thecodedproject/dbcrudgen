@@ -47,6 +47,12 @@ func fileDBCrudTest(d pkgDef) func() ([]gopkg.FileContents, error) {
 				},
 			)
 
+			if d.UseDBContext {
+				imports = append(imports, tmpl.UnnamedImports(
+					"github.com/thecodedproject/dbcrudgen/lib",
+				)...)
+			}
+
 			helpers, err := testHelperMethods(d, modelName, modelStruct)
 			if err != nil {
 				return nil, err
@@ -87,6 +93,7 @@ func testfuncInsertAndSelect(
 		Args: []gopkg.DeclVar{
 			testingArg(),
 		},
+		BodyData: d,
 		BodyTmpl: `
 	now := gotest_time.SetTimeNowForTesting(t)
 
@@ -155,6 +162,15 @@ func testfuncInsertAndSelect(
 	for _, test := range testCases {
 		t.Run(test.Name, func(t *testing.T) {
 
+{{- if .BodyData.UseDBContext}}
+			db := sqltest.OpenMysql(t, "schema.sql")
+			ctx := lib.ContextWithDB(context.Background(), db)
+
+			for _, d := range test.ToInsert {
+				_, err := ` + dbcrudAlias + `.Insert(ctx, d)
+				require.NoError(t, err)
+			}
+{{- else}}
 			ctx := context.Background()
 			db := sqltest.OpenMysql(t, "schema.sql")
 
@@ -162,6 +178,7 @@ func testfuncInsertAndSelect(
 				_, err := ` + dbcrudAlias + `.Insert(ctx, db, d)
 				require.NoError(t, err)
 			}
+{{- end}}
 
 			actual, err := ` + dbcrudAlias + `.Select(ctx, db, test.Query)
 			if test.ExpectErr {
@@ -195,6 +212,7 @@ func testfuncSelectByID(
 		Args: []gopkg.DeclVar{
 			testingArg(),
 		},
+		BodyData: d,
 		BodyTmpl: `
 	now := gotest_time.SetTimeNowForTesting(t)
 
@@ -229,6 +247,15 @@ func testfuncSelectByID(
 	for _, test := range testCases {
 		t.Run(test.Name, func(t *testing.T) {
 
+{{- if .BodyData.UseDBContext}}
+			db := sqltest.OpenMysql(t, "schema.sql")
+			ctx := lib.ContextWithDB(context.Background(), db)
+
+			for _, d := range test.ToInsert {
+				_, err := ` + dbcrudAlias + `.Insert(ctx, d)
+				require.NoError(t, err)
+			}
+{{- else}}
 			ctx := context.Background()
 			db := sqltest.OpenMysql(t, "schema.sql")
 
@@ -236,6 +263,7 @@ func testfuncSelectByID(
 				_, err := ` + dbcrudAlias + `.Insert(ctx, db, d)
 				require.NoError(t, err)
 			}
+{{- end}}
 
 			actual, err := ` + dbcrudAlias + `.SelectByID(ctx, db, test.ID)
 			if test.ExpectErr {
@@ -265,7 +293,7 @@ func testfuncUpdate(
 		Args: []gopkg.DeclVar{
 			testingArg(),
 		},
-		//BodyData: scanArgs,
+		BodyData: d,
 		BodyTmpl: `
 	now := gotest_time.SetTimeNowForTesting(t)
 
@@ -340,17 +368,23 @@ func testfuncUpdate(
 	for _, test := range testCases {
 		t.Run(test.Name, func(t *testing.T) {
 
+{{- if .BodyData.UseDBContext}}
+			db := sqltest.OpenMysql(t, "schema.sql")
+			ctx := lib.ContextWithDB(context.Background(), db)
+
+			for _, d := range test.ToInsert {
+				_, err := ` + dbcrudAlias + `.Insert(ctx, d)
+				require.NoError(t, err)
+			}
+{{- else}}
 			ctx := context.Background()
 			db := sqltest.OpenMysql(t, "schema.sql")
 
 			for _, d := range test.ToInsert {
-				_, err := ` + dbcrudAlias + `.Insert(
-					ctx,
-					db,
-					d,
-				)
+				_, err := ` + dbcrudAlias + `.Insert(ctx, db, d)
 				require.NoError(t, err)
 			}
+{{- end}}
 
 			numUpdates, err := ` + dbcrudAlias + `.Update(
 				ctx,
@@ -394,6 +428,7 @@ func testfuncUpdateByID(
 		Args: []gopkg.DeclVar{
 			testingArg(),
 		},
+		BodyData: d,
 		BodyTmpl: `
 	now := gotest_time.SetTimeNowForTesting(t)
 
@@ -444,6 +479,15 @@ func testfuncUpdateByID(
 	for _, test := range testCases {
 		t.Run(test.Name, func(t *testing.T) {
 
+{{- if .BodyData.UseDBContext}}
+			db := sqltest.OpenMysql(t, "schema.sql")
+			ctx := lib.ContextWithDB(context.Background(), db)
+
+			for _, d := range test.ToInsert {
+				_, err := ` + dbcrudAlias + `.Insert(ctx, d)
+				require.NoError(t, err)
+			}
+{{- else}}
 			ctx := context.Background()
 			db := sqltest.OpenMysql(t, "schema.sql")
 
@@ -451,6 +495,7 @@ func testfuncUpdateByID(
 				_, err := ` + dbcrudAlias + `.Insert(ctx, db, d)
 				require.NoError(t, err)
 			}
+{{- end}}
 
 			err := ` + dbcrudAlias + `.UpdateByID(
 				ctx,
@@ -493,6 +538,7 @@ func testfuncDelete(
 		Args: []gopkg.DeclVar{
 			testingArg(),
 		},
+		BodyData: d,
 		BodyTmpl: `
 	now := gotest_time.SetTimeNowForTesting(t)
 
@@ -547,6 +593,15 @@ func testfuncDelete(
 	for _, test := range testCases {
 		t.Run(test.Name, func(t *testing.T) {
 
+{{- if .BodyData.UseDBContext}}
+			db := sqltest.OpenMysql(t, "schema.sql")
+			ctx := lib.ContextWithDB(context.Background(), db)
+
+			for _, d := range test.ToInsert {
+				_, err := ` + dbcrudAlias + `.Insert(ctx, d)
+				require.NoError(t, err)
+			}
+{{- else}}
 			ctx := context.Background()
 			db := sqltest.OpenMysql(t, "schema.sql")
 
@@ -554,6 +609,7 @@ func testfuncDelete(
 				_, err := ` + dbcrudAlias + `.Insert(ctx, db, d)
 				require.NoError(t, err)
 			}
+{{- end}}
 
 			numDeleted, err := ` + dbcrudAlias + `.Delete(ctx, db, test.Query)
 			if test.ExpectErr {
@@ -592,6 +648,7 @@ func testfuncDeleteByID(
 		Args: []gopkg.DeclVar{
 			testingArg(),
 		},
+		BodyData: d,
 		BodyTmpl: `
 	now := gotest_time.SetTimeNowForTesting(t)
 
@@ -626,6 +683,15 @@ func testfuncDeleteByID(
 	for _, test := range testCases {
 		t.Run(test.Name, func(t *testing.T) {
 
+{{- if .BodyData.UseDBContext}}
+			db := sqltest.OpenMysql(t, "schema.sql")
+			ctx := lib.ContextWithDB(context.Background(), db)
+
+			for _, d := range test.ToInsert {
+				_, err := ` + dbcrudAlias + `.Insert(ctx, d)
+				require.NoError(t, err)
+			}
+{{- else}}
 			ctx := context.Background()
 			db := sqltest.OpenMysql(t, "schema.sql")
 
@@ -633,6 +699,7 @@ func testfuncDeleteByID(
 				_, err := ` + dbcrudAlias + `.Insert(ctx, db, d)
 				require.NoError(t, err)
 			}
+{{- end}}
 
 			err := ` + dbcrudAlias + `.DeleteByID(
 				ctx,
