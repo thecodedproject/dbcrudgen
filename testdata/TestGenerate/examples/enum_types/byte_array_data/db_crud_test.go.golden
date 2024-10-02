@@ -106,8 +106,8 @@ func TestInsertAndSelect(t *testing.T) {
 
 	for _, test := range testCases {
 		t.Run(test.Name, func(t *testing.T) {
-			ctx := context.Background()
 			db := sqltest.OpenMysql(t, "schema.sql")
+			ctx := context.Background()
 
 			for _, d := range test.ToInsert {
 				_, err := byte_array_data.Insert(ctx, db, d)
@@ -164,8 +164,8 @@ func TestSelectByID(t *testing.T) {
 
 	for _, test := range testCases {
 		t.Run(test.Name, func(t *testing.T) {
-			ctx := context.Background()
 			db := sqltest.OpenMysql(t, "schema.sql")
+			ctx := context.Background()
 
 			for _, d := range test.ToInsert {
 				_, err := byte_array_data.Insert(ctx, db, d)
@@ -258,20 +258,15 @@ func TestUpdate(t *testing.T) {
 
 	for _, test := range testCases {
 		t.Run(test.Name, func(t *testing.T) {
-			ctx := context.Background()
 			db := sqltest.OpenMysql(t, "schema.sql")
+			ctx := context.Background()
 
 			for _, d := range test.ToInsert {
 				_, err := byte_array_data.Insert(ctx, db, d)
 				require.NoError(t, err)
 			}
 
-			numUpdates, err := byte_array_data.Update(
-				ctx,
-				db,
-				test.Updates,
-				test.Query,
-			)
+			numUpdates, err := byte_array_data.Update(ctx, db, test.Updates, test.Query)
 			if test.ExpectErr {
 				require.Error(t, err)
 				return
@@ -342,20 +337,15 @@ func TestUpdateByID(t *testing.T) {
 
 	for _, test := range testCases {
 		t.Run(test.Name, func(t *testing.T) {
-			ctx := context.Background()
 			db := sqltest.OpenMysql(t, "schema.sql")
+			ctx := context.Background()
 
 			for _, d := range test.ToInsert {
 				_, err := byte_array_data.Insert(ctx, db, d)
 				require.NoError(t, err)
 			}
 
-			err := byte_array_data.UpdateByID(
-				ctx,
-				db,
-				test.ID,
-				test.Updates,
-			)
+			err := byte_array_data.UpdateByID(ctx, db, test.ID, test.Updates)
 
 			if test.ExpectErr {
 				require.Error(t, err)
@@ -429,8 +419,8 @@ func TestDelete(t *testing.T) {
 
 	for _, test := range testCases {
 		t.Run(test.Name, func(t *testing.T) {
-			ctx := context.Background()
 			db := sqltest.OpenMysql(t, "schema.sql")
+			ctx := context.Background()
 
 			for _, d := range test.ToInsert {
 				_, err := byte_array_data.Insert(ctx, db, d)
@@ -492,19 +482,15 @@ func TestDeleteByID(t *testing.T) {
 
 	for _, test := range testCases {
 		t.Run(test.Name, func(t *testing.T) {
-			ctx := context.Background()
 			db := sqltest.OpenMysql(t, "schema.sql")
+			ctx := context.Background()
 
 			for _, d := range test.ToInsert {
 				_, err := byte_array_data.Insert(ctx, db, d)
 				require.NoError(t, err)
 			}
 
-			err := byte_array_data.DeleteByID(
-				ctx,
-				db,
-				test.ID,
-			)
+			err := byte_array_data.DeleteByID(ctx, db, test.ID)
 
 			if test.ExpectErr {
 				require.Error(t, err)

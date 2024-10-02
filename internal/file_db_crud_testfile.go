@@ -88,6 +88,11 @@ func testfuncInsertAndSelect(
 	dbcrudAlias := strcase.ToSnake(modelName)
 	dbModelType := d.Import.Alias + "." + modelName
 
+	ctxAndDbArgs := `ctx, db`
+	if d.UseDBContext {
+		ctxAndDbArgs = `ctx`
+	}
+
 	return gopkg.DeclFunc{
 		Name: "TestInsertAndSelect",
 		Args: []gopkg.DeclVar{
@@ -161,28 +166,19 @@ func testfuncInsertAndSelect(
 
 	for _, test := range testCases {
 		t.Run(test.Name, func(t *testing.T) {
-
-{{- if .BodyData.UseDBContext}}
 			db := sqltest.OpenMysql(t, "schema.sql")
+{{- if .BodyData.UseDBContext}}
 			ctx := lib.ContextWithDB(context.Background(), db)
-
-			for _, d := range test.ToInsert {
-				_, err := ` + dbcrudAlias + `.Insert(ctx, d)
-				require.NoError(t, err)
-			}
-
-			actual, err := ` + dbcrudAlias + `.Select(ctx, test.Query)
 {{- else}}
 			ctx := context.Background()
-			db := sqltest.OpenMysql(t, "schema.sql")
+{{- end}}
 
 			for _, d := range test.ToInsert {
-				_, err := ` + dbcrudAlias + `.Insert(ctx, db, d)
+				_, err := ` + dbcrudAlias + `.Insert(` + ctxAndDbArgs + `, d)
 				require.NoError(t, err)
 			}
 
-			actual, err := ` + dbcrudAlias + `.Select(ctx, db, test.Query)
-{{- end}}
+			actual, err := ` + dbcrudAlias + `.Select(` + ctxAndDbArgs + `, test.Query)
 			if test.ExpectErr {
 				require.Error(t, err)
 				return
@@ -208,6 +204,11 @@ func testfuncSelectByID(
 
 	dbcrudAlias := strcase.ToSnake(modelName)
 	dbModelType := d.Import.Alias + "." + modelName
+
+	ctxAndDbArgs := `ctx, db`
+	if d.UseDBContext {
+		ctxAndDbArgs = `ctx`
+	}
 
 	return gopkg.DeclFunc{
 		Name: "TestSelectByID",
@@ -248,28 +249,19 @@ func testfuncSelectByID(
 
 	for _, test := range testCases {
 		t.Run(test.Name, func(t *testing.T) {
-
-{{- if .BodyData.UseDBContext}}
 			db := sqltest.OpenMysql(t, "schema.sql")
+{{- if .BodyData.UseDBContext}}
 			ctx := lib.ContextWithDB(context.Background(), db)
-
-			for _, d := range test.ToInsert {
-				_, err := ` + dbcrudAlias + `.Insert(ctx, d)
-				require.NoError(t, err)
-			}
-
-			actual, err := ` + dbcrudAlias + `.SelectByID(ctx, test.ID)
 {{- else}}
 			ctx := context.Background()
-			db := sqltest.OpenMysql(t, "schema.sql")
+{{- end}}
 
 			for _, d := range test.ToInsert {
-				_, err := ` + dbcrudAlias + `.Insert(ctx, db, d)
+				_, err := ` + dbcrudAlias + `.Insert(` + ctxAndDbArgs + `, d)
 				require.NoError(t, err)
 			}
 
-			actual, err := ` + dbcrudAlias + `.SelectByID(ctx, db, test.ID)
-{{- end}}
+			actual, err := ` + dbcrudAlias + `.SelectByID(` + ctxAndDbArgs + `, test.ID)
 			if test.ExpectErr {
 				require.Error(t, err)
 				return
@@ -291,6 +283,11 @@ func testfuncUpdate(
 
 	dbcrudAlias := strcase.ToSnake(modelName)
 	dbModelType := d.Import.Alias + "." + modelName
+
+	ctxAndDbArgs := `ctx, db`
+	if d.UseDBContext {
+		ctxAndDbArgs = `ctx`
+	}
 
 	return gopkg.DeclFunc{
 		Name: "TestUpdate",
@@ -371,45 +368,19 @@ func testfuncUpdate(
 
 	for _, test := range testCases {
 		t.Run(test.Name, func(t *testing.T) {
-
-{{- if .BodyData.UseDBContext}}
 			db := sqltest.OpenMysql(t, "schema.sql")
+{{- if .BodyData.UseDBContext}}
 			ctx := lib.ContextWithDB(context.Background(), db)
-
-			for _, d := range test.ToInsert {
-				_, err := ` + dbcrudAlias + `.Insert(ctx, d)
-				require.NoError(t, err)
-			}
-
-			numUpdates, err := ` + dbcrudAlias + `.Update(
-				ctx,
-				test.Updates,
-				test.Query,
-			)
-			if test.ExpectErr {
-				require.Error(t, err)
-				return
-			}
-			require.NoError(t, err)
-
-			require.Equal(t, test.ExpectedNumUpdates, numUpdates)
-
-			actual, err := ` + dbcrudAlias + `.Select(ctx, nil)
 {{- else}}
 			ctx := context.Background()
-			db := sqltest.OpenMysql(t, "schema.sql")
+{{- end}}
 
 			for _, d := range test.ToInsert {
-				_, err := ` + dbcrudAlias + `.Insert(ctx, db, d)
+				_, err := ` + dbcrudAlias + `.Insert(` + ctxAndDbArgs + `, d)
 				require.NoError(t, err)
 			}
 
-			numUpdates, err := ` + dbcrudAlias + `.Update(
-				ctx,
-				db,
-				test.Updates,
-				test.Query,
-			)
+			numUpdates, err := ` + dbcrudAlias + `.Update(` + ctxAndDbArgs + `, test.Updates, test.Query)
 			if test.ExpectErr {
 				require.Error(t, err)
 				return
@@ -418,8 +389,7 @@ func testfuncUpdate(
 
 			require.Equal(t, test.ExpectedNumUpdates, numUpdates)
 
-			actual, err := ` + dbcrudAlias + `.Select(ctx, db, nil)
-{{- end}}
+			actual, err := ` + dbcrudAlias + `.Select(` + ctxAndDbArgs + `, nil)
 			require.NoError(t, err)
 
 			require.Equal(t, len(test.Expected), len(actual))
@@ -441,6 +411,11 @@ func testfuncUpdateByID(
 
 	dbcrudAlias := strcase.ToSnake(modelName)
 	dbModelType := d.Import.Alias + "." + modelName
+
+	ctxAndDbArgs := `ctx, db`
+	if d.UseDBContext {
+		ctxAndDbArgs = `ctx`
+	}
 
 	return gopkg.DeclFunc{
 		Name: "TestUpdateByID",
@@ -497,44 +472,19 @@ func testfuncUpdateByID(
 
 	for _, test := range testCases {
 		t.Run(test.Name, func(t *testing.T) {
-
-{{- if .BodyData.UseDBContext}}
 			db := sqltest.OpenMysql(t, "schema.sql")
+{{- if .BodyData.UseDBContext}}
 			ctx := lib.ContextWithDB(context.Background(), db)
-
-			for _, d := range test.ToInsert {
-				_, err := ` + dbcrudAlias + `.Insert(ctx, d)
-				require.NoError(t, err)
-			}
-
-			err := ` + dbcrudAlias + `.UpdateByID(
-				ctx,
-				test.ID,
-				test.Updates,
-			)
-
-			if test.ExpectErr {
-				require.Error(t, err)
-				return
-			}
-			require.NoError(t, err)
-
-			actual, err := ` + dbcrudAlias + `.Select(ctx, nil)
 {{- else}}
 			ctx := context.Background()
-			db := sqltest.OpenMysql(t, "schema.sql")
+{{- end}}
 
 			for _, d := range test.ToInsert {
-				_, err := ` + dbcrudAlias + `.Insert(ctx, db, d)
+				_, err := ` + dbcrudAlias + `.Insert(` + ctxAndDbArgs + `, d)
 				require.NoError(t, err)
 			}
 
-			err := ` + dbcrudAlias + `.UpdateByID(
-				ctx,
-				db,
-				test.ID,
-				test.Updates,
-			)
+			err := ` + dbcrudAlias + `.UpdateByID(` + ctxAndDbArgs + `, test.ID, test.Updates)
 
 			if test.ExpectErr {
 				require.Error(t, err)
@@ -542,8 +492,7 @@ func testfuncUpdateByID(
 			}
 			require.NoError(t, err)
 
-			actual, err := ` + dbcrudAlias + `.Select(ctx, db, nil)
-{{- end}}
+			actual, err := ` + dbcrudAlias + `.Select(` + ctxAndDbArgs + `, nil)
 			require.NoError(t, err)
 
 			require.Equal(t, len(test.Expected), len(actual))
@@ -565,6 +514,11 @@ func testfuncDelete(
 
 	dbcrudAlias := strcase.ToSnake(modelName)
 	dbModelType := d.Import.Alias + "." + modelName
+
+	ctxAndDbArgs := `ctx, db`
+	if d.UseDBContext {
+		ctxAndDbArgs = `ctx`
+	}
 
 	return gopkg.DeclFunc{
 		Name: "TestDelete",
@@ -625,36 +579,19 @@ func testfuncDelete(
 
 	for _, test := range testCases {
 		t.Run(test.Name, func(t *testing.T) {
-
-{{- if .BodyData.UseDBContext}}
 			db := sqltest.OpenMysql(t, "schema.sql")
+{{- if .BodyData.UseDBContext}}
 			ctx := lib.ContextWithDB(context.Background(), db)
-
-			for _, d := range test.ToInsert {
-				_, err := ` + dbcrudAlias + `.Insert(ctx, d)
-				require.NoError(t, err)
-			}
-
-			numDeleted, err := ` + dbcrudAlias + `.Delete(ctx, test.Query)
-			if test.ExpectErr {
-				require.Error(t, err)
-				return
-			}
-			require.NoError(t, err)
-
-			require.Equal(t, test.ExpectedNumDeleted, numDeleted)
-
-			actual, err := ` + dbcrudAlias + `.Select(ctx, nil)
 {{- else}}
 			ctx := context.Background()
-			db := sqltest.OpenMysql(t, "schema.sql")
+{{- end}}
 
 			for _, d := range test.ToInsert {
-				_, err := ` + dbcrudAlias + `.Insert(ctx, db, d)
+				_, err := ` + dbcrudAlias + `.Insert(` + ctxAndDbArgs + `, d)
 				require.NoError(t, err)
 			}
 
-			numDeleted, err := ` + dbcrudAlias + `.Delete(ctx, db, test.Query)
+			numDeleted, err := ` + dbcrudAlias + `.Delete(` + ctxAndDbArgs + `, test.Query)
 			if test.ExpectErr {
 				require.Error(t, err)
 				return
@@ -663,8 +600,7 @@ func testfuncDelete(
 
 			require.Equal(t, test.ExpectedNumDeleted, numDeleted)
 
-			actual, err := ` + dbcrudAlias + `.Select(ctx, db, nil)
-{{- end}}
+			actual, err := ` + dbcrudAlias + `.Select(` + ctxAndDbArgs + `, nil)
 			require.NoError(t, err)
 
 			require.Equal(t, len(test.Expected), len(actual))
@@ -686,6 +622,11 @@ func testfuncDeleteByID(
 
 	dbcrudAlias := strcase.ToSnake(modelName)
 	dbModelType := d.Import.Alias + "." + modelName
+
+	ctxAndDbArgs := `ctx, db`
+	if d.UseDBContext {
+		ctxAndDbArgs = `ctx`
+	}
 
 	return gopkg.DeclFunc{
 		Name: "TestDeleteByID",
@@ -726,42 +667,19 @@ func testfuncDeleteByID(
 
 	for _, test := range testCases {
 		t.Run(test.Name, func(t *testing.T) {
-
-{{- if .BodyData.UseDBContext}}
 			db := sqltest.OpenMysql(t, "schema.sql")
+{{- if .BodyData.UseDBContext}}
 			ctx := lib.ContextWithDB(context.Background(), db)
-
-			for _, d := range test.ToInsert {
-				_, err := ` + dbcrudAlias + `.Insert(ctx, d)
-				require.NoError(t, err)
-			}
-
-			err := ` + dbcrudAlias + `.DeleteByID(
-				ctx,
-				test.ID,
-			)
-
-			if test.ExpectErr {
-				require.Error(t, err)
-				return
-			}
-			require.NoError(t, err)
-
-			actual, err := ` + dbcrudAlias + `.Select(ctx, nil)
 {{- else}}
 			ctx := context.Background()
-			db := sqltest.OpenMysql(t, "schema.sql")
+{{- end}}
 
 			for _, d := range test.ToInsert {
-				_, err := ` + dbcrudAlias + `.Insert(ctx, db, d)
+				_, err := ` + dbcrudAlias + `.Insert(` + ctxAndDbArgs + `, d)
 				require.NoError(t, err)
 			}
 
-			err := ` + dbcrudAlias + `.DeleteByID(
-				ctx,
-				db,
-				test.ID,
-			)
+			err := ` + dbcrudAlias + `.DeleteByID(` + ctxAndDbArgs + `, test.ID)
 
 			if test.ExpectErr {
 				require.Error(t, err)
@@ -769,8 +687,7 @@ func testfuncDeleteByID(
 			}
 			require.NoError(t, err)
 
-			actual, err := ` + dbcrudAlias + `.Select(ctx, db, nil)
-{{- end}}
+			actual, err := ` + dbcrudAlias + `.Select(` + ctxAndDbArgs + `, nil)
 			require.NoError(t, err)
 
 			require.Equal(t, len(test.Expected), len(actual))

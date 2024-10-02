@@ -273,11 +273,7 @@ func TestUpdate(t *testing.T) {
 				require.NoError(t, err)
 			}
 
-			numUpdates, err := my_data_model.Update(
-				ctx,
-				test.Updates,
-				test.Query,
-			)
+			numUpdates, err := my_data_model.Update(ctx, test.Updates, test.Query)
 			if test.ExpectErr {
 				require.Error(t, err)
 				return
@@ -356,11 +352,7 @@ func TestUpdateByID(t *testing.T) {
 				require.NoError(t, err)
 			}
 
-			err := my_data_model.UpdateByID(
-				ctx,
-				test.ID,
-				test.Updates,
-			)
+			err := my_data_model.UpdateByID(ctx, test.ID, test.Updates)
 
 			if test.ExpectErr {
 				require.Error(t, err)
@@ -505,10 +497,7 @@ func TestDeleteByID(t *testing.T) {
 				require.NoError(t, err)
 			}
 
-			err := my_data_model.DeleteByID(
-				ctx,
-				test.ID,
-			)
+			err := my_data_model.DeleteByID(ctx, test.ID)
 
 			if test.ExpectErr {
 				require.Error(t, err)
