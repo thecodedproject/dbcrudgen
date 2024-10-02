@@ -73,7 +73,6 @@ func Select(
 	queryParams map[string]any,
 ) ([]enum_types.ModelWithMultipleEnumsAndFields, error) {
 
-
 	q := "select id, b_enum, i_32_enum, i_64_enum, s_enum, (a = '1'), b, c, d, e from model_with_multiple_enums_and_fields"
 
 	if len(queryParams) > 0 {

@@ -189,17 +189,23 @@ func selectByIDMethod(
 
 	query += " from " + strcase.ToSnake(modelName) + " where id=?"
 
+	selectCtxAndDbArgs := `
+		ctx,
+		db,`
+	if d.UseDBContext {
+		selectCtxAndDbArgs = `
+		ctx,`
+	}
 
 	return gopkg.DeclFunc{
 		Name: "SelectByID",
-		Args: []gopkg.DeclVar{
-			ctxArg(),
-			dbArg(),
-			{
+		Args: dbMethodArgs(
+			d.UseDBContext,
+			gopkg.DeclVar{
 				Name: "id",
 				Type: gopkg.TypeInt64{},
 			},
-		},
+		),
 		ReturnArgs: tmpl.UnnamedReturnArgs(
 			gopkg.TypeNamed{
 				Name: dbModelType,
@@ -210,9 +216,7 @@ func selectByIDMethod(
 		),
 		BodyData: scanArgs,
 		BodyTmpl: `
-	r, err := Select(
-		ctx,
-		db,
+	r, err := Select(` + selectCtxAndDbArgs + `
 		map[string]any{
 			"id": id,
 		},
@@ -271,20 +275,28 @@ func selectMethod(
 
 	query += " from " + strcase.ToSnake(modelName)
 
+	dbContextExtraction := ""
+	if d.UseDBContext {
+		dbContextExtraction = `
+	db, err := lib.DBFromContext(ctx)
+	if err != nil {
+		{{FuncReturnDefaultsWithErr}}
+	}
+`
+	}
 
 	return gopkg.DeclFunc{
 		Name: "Select",
-		Args: []gopkg.DeclVar{
-			ctxArg(),
-			dbArg(),
-			{
+		Args: dbMethodArgs(
+			d.UseDBContext,
+			gopkg.DeclVar{
 				Name: "queryParams",
 				Type: gopkg.TypeMap{
 					KeyType: gopkg.TypeString{},
 					ValueType: gopkg.TypeAny{},
 				},
 			},
-		},
+		),
 		ReturnArgs: tmpl.UnnamedReturnArgs(
 			gopkg.TypeArray{
 				ValueType: gopkg.TypeNamed{
@@ -296,8 +308,7 @@ func selectMethod(
 			gopkg.TypeError{},
 		),
 		BodyData: scanArgs,
-		BodyTmpl: `
-
+		BodyTmpl: dbContextExtraction + `
 	q := "` + query + `"
 
 	if len(queryParams) > 0 {
@@ -365,29 +376,28 @@ func updateMethod(
 
 	return gopkg.DeclFunc{
 		Name: "Update",
-		Args: []gopkg.DeclVar{
-			ctxArg(),
-			dbArg(),
-			{
+		Args: dbMethodArgs(
+			d.UseDBContext,
+			gopkg.DeclVar{
 				Name: "updates",
 				Type: gopkg.TypeMap{
 					KeyType: gopkg.TypeString{},
 					ValueType: gopkg.TypeAny{},
 				},
 			},
-			{
+			gopkg.DeclVar{
 				Name: "queryParams",
 				Type: gopkg.TypeMap{
 					KeyType: gopkg.TypeString{},
 					ValueType: gopkg.TypeAny{},
 				},
 			},
-		},
+		),
 		ReturnArgs: tmpl.UnnamedReturnArgs(
 			gopkg.TypeInt64{},
 			gopkg.TypeError{},
 		),
-		BodyTmpl: `
+		BodyTmpl: dbContextExtractionCode(d) + `
 	if len(updates) == 0 {
 		return 0, nil
 	}
@@ -452,23 +462,30 @@ func updateByIDMethod(
 	modelStruct gopkg.TypeStruct,
 ) gopkg.DeclFunc {
 
+	updateCtxAndDbArgs := `
+		ctx,
+		db,`
+	if d.UseDBContext {
+		updateCtxAndDbArgs = `
+		ctx,`
+	}
+
 	return gopkg.DeclFunc{
 		Name: "UpdateByID",
-		Args: []gopkg.DeclVar{
-			ctxArg(),
-			dbArg(),
-			{
+		Args: dbMethodArgs(
+			d.UseDBContext,
+			gopkg.DeclVar{
 				Name: "id",
 				Type: gopkg.TypeInt64{},
 			},
-			{
+			gopkg.DeclVar{
 				Name: "updates",
 				Type: gopkg.TypeMap{
 					KeyType: gopkg.TypeString{},
 					ValueType: gopkg.TypeAny{},
 				},
 			},
-		},
+		),
 		ReturnArgs: tmpl.UnnamedReturnArgs(
 			gopkg.TypeError{},
 		),
@@ -477,9 +494,7 @@ func updateByIDMethod(
 		return nil
 	}
 
-	n, err := Update(
-		ctx,
-		db,
+	n, err := Update(` + updateCtxAndDbArgs + `
 		updates,
 		map[string]any{
 			"id": id,
@@ -508,22 +523,21 @@ func deleteMethod(
 
 	return gopkg.DeclFunc{
 		Name: "Delete",
-		Args: []gopkg.DeclVar{
-			ctxArg(),
-			dbArg(),
-			{
+		Args: dbMethodArgs(
+			d.UseDBContext,
+			gopkg.DeclVar{
 				Name: "queryParams",
 				Type: gopkg.TypeMap{
 					KeyType: gopkg.TypeString{},
 					ValueType: gopkg.TypeAny{},
 				},
 			},
-		},
+		),
 		ReturnArgs: tmpl.UnnamedReturnArgs(
 			gopkg.TypeInt64{},
 			gopkg.TypeError{},
 		),
-		BodyTmpl: `
+		BodyTmpl: dbContextExtractionCode(d) + `
 	query := "delete from ` + dbTable + `"
 
 	if len(queryParams) > 0 {
@@ -570,23 +584,28 @@ func deleteByIDMethod(
 	modelStruct gopkg.TypeStruct,
 ) gopkg.DeclFunc {
 
+	deleteCtxAndDbArgs := `
+		ctx,
+		db,`
+	if d.UseDBContext {
+		deleteCtxAndDbArgs = `
+		ctx,`
+	}
+
 	return gopkg.DeclFunc{
 		Name: "DeleteByID",
-		Args: []gopkg.DeclVar{
-			ctxArg(),
-			dbArg(),
-			{
+		Args: dbMethodArgs(
+			d.UseDBContext,
+			gopkg.DeclVar{
 				Name: "id",
 				Type: gopkg.TypeInt64{},
 			},
-		},
+		),
 		ReturnArgs: tmpl.UnnamedReturnArgs(
 			gopkg.TypeError{},
 		),
 		BodyTmpl: `
-	n, err := Delete(
-		ctx,
-		db,
+	n, err := Delete(` + deleteCtxAndDbArgs + `
 		map[string]any{
 			"id": id,
 		},
@@ -617,7 +636,6 @@ func modelContainsFieldMethod(
 			strcase.ToSnake(f.Name),
 		)
 	}
-
 
 	return gopkg.DeclFunc{
 		Name: "modelContainsField",
@@ -687,4 +705,21 @@ func dbMethodArgs(
 	}
 
 	return append(retArgs, args...)
+}
+
+// dbContextExtractionCode returns the code block required to extract the `sql.DB`
+// type from the context (or an empty string if db context is not enabled)
+func dbContextExtractionCode(
+	d pkgDef,
+) string {
+
+	if d.UseDBContext {
+		return `
+	db, err := lib.DBFromContext(ctx)
+	if err != nil {
+		{{FuncReturnDefaultsWithErr}}
+	}
+`
+	}
+	return ""
 }

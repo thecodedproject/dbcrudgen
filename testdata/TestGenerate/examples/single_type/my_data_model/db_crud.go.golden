@@ -70,7 +70,6 @@ func Select(
 	queryParams map[string]any,
 ) ([]single_type.MyDataModel, error) {
 
-
 	q := "select id, inserted_at, updated_at, some_string, some_int, (some_bool = '1') from my_data_model"
 
 	if len(queryParams) > 0 {

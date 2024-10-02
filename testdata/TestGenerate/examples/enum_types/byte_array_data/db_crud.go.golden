@@ -65,7 +65,6 @@ func Select(
 	queryParams map[string]any,
 ) ([]enum_types.ByteArrayData, error) {
 
-
 	q := "select id, enum from byte_array_data"
 
 	if len(queryParams) > 0 {

@@ -71,7 +71,6 @@ func Select(
 	queryParams map[string]any,
 ) ([]without_timestamps.EntityWithoutTimestamp, error) {
 
-
 	q := "select id, a_str, b_str, a_byte_slice, a_int_64, b_int_32, a_float_32, b_float_64 from entity_without_timestamp"
 
 	if len(queryParams) > 0 {

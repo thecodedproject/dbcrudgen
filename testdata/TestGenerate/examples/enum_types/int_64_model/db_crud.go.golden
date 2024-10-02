@@ -65,7 +65,6 @@ func Select(
 	queryParams map[string]any,
 ) ([]enum_types.Int64Model, error) {
 
-
 	q := "select id, enum from int_64_model"
 
 	if len(queryParams) > 0 {

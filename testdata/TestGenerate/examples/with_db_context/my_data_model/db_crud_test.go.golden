@@ -121,7 +121,7 @@ func TestInsertAndSelect(t *testing.T) {
 				require.NoError(t, err)
 			}
 
-			actual, err := my_data_model.Select(ctx, db, test.Query)
+			actual, err := my_data_model.Select(ctx, test.Query)
 			if test.ExpectErr {
 				require.Error(t, err)
 				return
@@ -179,7 +179,7 @@ func TestSelectByID(t *testing.T) {
 				require.NoError(t, err)
 			}
 
-			actual, err := my_data_model.SelectByID(ctx, db, test.ID)
+			actual, err := my_data_model.SelectByID(ctx, test.ID)
 			if test.ExpectErr {
 				require.Error(t, err)
 				return
@@ -275,7 +275,6 @@ func TestUpdate(t *testing.T) {
 
 			numUpdates, err := my_data_model.Update(
 				ctx,
-				db,
 				test.Updates,
 				test.Query,
 			)
@@ -287,7 +286,7 @@ func TestUpdate(t *testing.T) {
 
 			require.Equal(t, test.ExpectedNumUpdates, numUpdates)
 
-			actual, err := my_data_model.Select(ctx, db, nil)
+			actual, err := my_data_model.Select(ctx, nil)
 			require.NoError(t, err)
 
 			require.Equal(t, len(test.Expected), len(actual))
@@ -359,7 +358,6 @@ func TestUpdateByID(t *testing.T) {
 
 			err := my_data_model.UpdateByID(
 				ctx,
-				db,
 				test.ID,
 				test.Updates,
 			)
@@ -370,7 +368,7 @@ func TestUpdateByID(t *testing.T) {
 			}
 			require.NoError(t, err)
 
-			actual, err := my_data_model.Select(ctx, db, nil)
+			actual, err := my_data_model.Select(ctx, nil)
 			require.NoError(t, err)
 
 			require.Equal(t, len(test.Expected), len(actual))
@@ -444,7 +442,7 @@ func TestDelete(t *testing.T) {
 				require.NoError(t, err)
 			}
 
-			numDeleted, err := my_data_model.Delete(ctx, db, test.Query)
+			numDeleted, err := my_data_model.Delete(ctx, test.Query)
 			if test.ExpectErr {
 				require.Error(t, err)
 				return
@@ -453,7 +451,7 @@ func TestDelete(t *testing.T) {
 
 			require.Equal(t, test.ExpectedNumDeleted, numDeleted)
 
-			actual, err := my_data_model.Select(ctx, db, nil)
+			actual, err := my_data_model.Select(ctx, nil)
 			require.NoError(t, err)
 
 			require.Equal(t, len(test.Expected), len(actual))
@@ -509,7 +507,6 @@ func TestDeleteByID(t *testing.T) {
 
 			err := my_data_model.DeleteByID(
 				ctx,
-				db,
 				test.ID,
 			)
 
@@ -519,7 +516,7 @@ func TestDeleteByID(t *testing.T) {
 			}
 			require.NoError(t, err)
 
-			actual, err := my_data_model.Select(ctx, db, nil)
+			actual, err := my_data_model.Select(ctx, nil)
 			require.NoError(t, err)
 
 			require.Equal(t, len(test.Expected), len(actual))

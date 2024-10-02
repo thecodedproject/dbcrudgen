@@ -2,7 +2,6 @@ package my_data_model
 
 import (
 	context "context"
-	sql "database/sql"
 	errors "errors"
 	fmt "fmt"
 	with_db_context "github.com/thecodedproject/dbcrudgen/examples/with_db_context"
@@ -43,13 +42,11 @@ func Insert(
 
 func SelectByID(
 	ctx context.Context,
-	db *sql.DB,
 	id int64,
 ) (with_db_context.MyDataModel, error) {
 
 	r, err := Select(
 		ctx,
-		db,
 		map[string]any{
 			"id": id,
 		},
@@ -71,10 +68,13 @@ func SelectByID(
 
 func Select(
 	ctx context.Context,
-	db *sql.DB,
 	queryParams map[string]any,
 ) ([]with_db_context.MyDataModel, error) {
 
+	db, err := lib.DBFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
 
 	q := "select id, inserted_at, updated_at, some_string, some_int, (some_bool = '1') from my_data_model"
 
@@ -136,10 +136,14 @@ func Select(
 
 func Update(
 	ctx context.Context,
-	db *sql.DB,
 	updates map[string]any,
 	queryParams map[string]any,
 ) (int64, error) {
+
+	db, err := lib.DBFromContext(ctx)
+	if err != nil {
+		return 0, err
+	}
 
 	if len(updates) == 0 {
 		return 0, nil
@@ -199,7 +203,6 @@ func Update(
 
 func UpdateByID(
 	ctx context.Context,
-	db *sql.DB,
 	id int64,
 	updates map[string]any,
 ) error {
@@ -210,7 +213,6 @@ func UpdateByID(
 
 	n, err := Update(
 		ctx,
-		db,
 		updates,
 		map[string]any{
 			"id": id,
@@ -229,9 +231,13 @@ func UpdateByID(
 
 func Delete(
 	ctx context.Context,
-	db *sql.DB,
 	queryParams map[string]any,
 ) (int64, error) {
+
+	db, err := lib.DBFromContext(ctx)
+	if err != nil {
+		return 0, err
+	}
 
 	query := "delete from my_data_model"
 
@@ -273,13 +279,11 @@ func Delete(
 
 func DeleteByID(
 	ctx context.Context,
-	db *sql.DB,
 	id int64,
 ) error {
 
 	n, err := Delete(
 		ctx,
-		db,
 		map[string]any{
 			"id": id,
 		},

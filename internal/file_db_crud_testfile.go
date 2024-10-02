@@ -170,6 +170,8 @@ func testfuncInsertAndSelect(
 				_, err := ` + dbcrudAlias + `.Insert(ctx, d)
 				require.NoError(t, err)
 			}
+
+			actual, err := ` + dbcrudAlias + `.Select(ctx, test.Query)
 {{- else}}
 			ctx := context.Background()
 			db := sqltest.OpenMysql(t, "schema.sql")
@@ -178,9 +180,9 @@ func testfuncInsertAndSelect(
 				_, err := ` + dbcrudAlias + `.Insert(ctx, db, d)
 				require.NoError(t, err)
 			}
-{{- end}}
 
 			actual, err := ` + dbcrudAlias + `.Select(ctx, db, test.Query)
+{{- end}}
 			if test.ExpectErr {
 				require.Error(t, err)
 				return
@@ -255,6 +257,8 @@ func testfuncSelectByID(
 				_, err := ` + dbcrudAlias + `.Insert(ctx, d)
 				require.NoError(t, err)
 			}
+
+			actual, err := ` + dbcrudAlias + `.SelectByID(ctx, test.ID)
 {{- else}}
 			ctx := context.Background()
 			db := sqltest.OpenMysql(t, "schema.sql")
@@ -263,9 +267,9 @@ func testfuncSelectByID(
 				_, err := ` + dbcrudAlias + `.Insert(ctx, db, d)
 				require.NoError(t, err)
 			}
-{{- end}}
 
 			actual, err := ` + dbcrudAlias + `.SelectByID(ctx, db, test.ID)
+{{- end}}
 			if test.ExpectErr {
 				require.Error(t, err)
 				return
@@ -376,6 +380,21 @@ func testfuncUpdate(
 				_, err := ` + dbcrudAlias + `.Insert(ctx, d)
 				require.NoError(t, err)
 			}
+
+			numUpdates, err := ` + dbcrudAlias + `.Update(
+				ctx,
+				test.Updates,
+				test.Query,
+			)
+			if test.ExpectErr {
+				require.Error(t, err)
+				return
+			}
+			require.NoError(t, err)
+
+			require.Equal(t, test.ExpectedNumUpdates, numUpdates)
+
+			actual, err := ` + dbcrudAlias + `.Select(ctx, nil)
 {{- else}}
 			ctx := context.Background()
 			db := sqltest.OpenMysql(t, "schema.sql")
@@ -384,7 +403,6 @@ func testfuncUpdate(
 				_, err := ` + dbcrudAlias + `.Insert(ctx, db, d)
 				require.NoError(t, err)
 			}
-{{- end}}
 
 			numUpdates, err := ` + dbcrudAlias + `.Update(
 				ctx,
@@ -401,6 +419,7 @@ func testfuncUpdate(
 			require.Equal(t, test.ExpectedNumUpdates, numUpdates)
 
 			actual, err := ` + dbcrudAlias + `.Select(ctx, db, nil)
+{{- end}}
 			require.NoError(t, err)
 
 			require.Equal(t, len(test.Expected), len(actual))
@@ -487,6 +506,20 @@ func testfuncUpdateByID(
 				_, err := ` + dbcrudAlias + `.Insert(ctx, d)
 				require.NoError(t, err)
 			}
+
+			err := ` + dbcrudAlias + `.UpdateByID(
+				ctx,
+				test.ID,
+				test.Updates,
+			)
+
+			if test.ExpectErr {
+				require.Error(t, err)
+				return
+			}
+			require.NoError(t, err)
+
+			actual, err := ` + dbcrudAlias + `.Select(ctx, nil)
 {{- else}}
 			ctx := context.Background()
 			db := sqltest.OpenMysql(t, "schema.sql")
@@ -495,7 +528,6 @@ func testfuncUpdateByID(
 				_, err := ` + dbcrudAlias + `.Insert(ctx, db, d)
 				require.NoError(t, err)
 			}
-{{- end}}
 
 			err := ` + dbcrudAlias + `.UpdateByID(
 				ctx,
@@ -511,6 +543,7 @@ func testfuncUpdateByID(
 			require.NoError(t, err)
 
 			actual, err := ` + dbcrudAlias + `.Select(ctx, db, nil)
+{{- end}}
 			require.NoError(t, err)
 
 			require.Equal(t, len(test.Expected), len(actual))
@@ -601,6 +634,17 @@ func testfuncDelete(
 				_, err := ` + dbcrudAlias + `.Insert(ctx, d)
 				require.NoError(t, err)
 			}
+
+			numDeleted, err := ` + dbcrudAlias + `.Delete(ctx, test.Query)
+			if test.ExpectErr {
+				require.Error(t, err)
+				return
+			}
+			require.NoError(t, err)
+
+			require.Equal(t, test.ExpectedNumDeleted, numDeleted)
+
+			actual, err := ` + dbcrudAlias + `.Select(ctx, nil)
 {{- else}}
 			ctx := context.Background()
 			db := sqltest.OpenMysql(t, "schema.sql")
@@ -609,7 +653,6 @@ func testfuncDelete(
 				_, err := ` + dbcrudAlias + `.Insert(ctx, db, d)
 				require.NoError(t, err)
 			}
-{{- end}}
 
 			numDeleted, err := ` + dbcrudAlias + `.Delete(ctx, db, test.Query)
 			if test.ExpectErr {
@@ -621,6 +664,7 @@ func testfuncDelete(
 			require.Equal(t, test.ExpectedNumDeleted, numDeleted)
 
 			actual, err := ` + dbcrudAlias + `.Select(ctx, db, nil)
+{{- end}}
 			require.NoError(t, err)
 
 			require.Equal(t, len(test.Expected), len(actual))
@@ -691,6 +735,19 @@ func testfuncDeleteByID(
 				_, err := ` + dbcrudAlias + `.Insert(ctx, d)
 				require.NoError(t, err)
 			}
+
+			err := ` + dbcrudAlias + `.DeleteByID(
+				ctx,
+				test.ID,
+			)
+
+			if test.ExpectErr {
+				require.Error(t, err)
+				return
+			}
+			require.NoError(t, err)
+
+			actual, err := ` + dbcrudAlias + `.Select(ctx, nil)
 {{- else}}
 			ctx := context.Background()
 			db := sqltest.OpenMysql(t, "schema.sql")
@@ -699,7 +756,6 @@ func testfuncDeleteByID(
 				_, err := ` + dbcrudAlias + `.Insert(ctx, db, d)
 				require.NoError(t, err)
 			}
-{{- end}}
 
 			err := ` + dbcrudAlias + `.DeleteByID(
 				ctx,
@@ -714,6 +770,7 @@ func testfuncDeleteByID(
 			require.NoError(t, err)
 
 			actual, err := ` + dbcrudAlias + `.Select(ctx, db, nil)
+{{- end}}
 			require.NoError(t, err)
 
 			require.Equal(t, len(test.Expected), len(actual))
